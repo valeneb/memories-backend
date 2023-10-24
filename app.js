@@ -10,12 +10,11 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 // const authRoute = require("./routes/auth");
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: "dbmg2zl7x",
+  api_key: "237518157193281",
+  api_secret: "ucWJnMRH_GBvQcP6RQDgUsAnDJ4",
   secure: true,
 });
-
 var app = express();
 const cors = require("cors");
 
