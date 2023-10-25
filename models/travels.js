@@ -43,6 +43,18 @@ const travelSchema = new mongoose.Schema({
   destination: String,
   departure: String,
   return: String,
+
+  location: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      required: true,
+    },
+    coordinates: {
+      type: [Number], //[latitude,longitude]
+      required: true,
+    },
+  },
   // coverImage: { type: mongoose.Schema.Types.Mixed, default: {} },
   // travelDiary: [{ type: mongoose.Schema.Types.ObjectId, ref: "Diary" }],
   // user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -51,10 +63,6 @@ const travelSchema = new mongoose.Schema({
   //   carRental: [carSchema],
   //   accomodations: [accomodationSchema],
   //   others: [otherSchema],
-  // },
-  // location: {
-  //   type: { type: String, default: "Point" },
-  //   coordinates: [Number],
   // },
 });
 

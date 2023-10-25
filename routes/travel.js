@@ -1,4 +1,3 @@
-const { format } = require("date-fns");
 const express = require("express");
 const router = express.Router();
 const User = require("../models/users");
@@ -6,7 +5,7 @@ const Travel = require("../models/travels");
 
 router.post("/newTrip", async (req, res) => {
   try {
-    const user = User.findOne({
+    const user = await User.findOne({
       token: req.body.token,
     });
 
@@ -22,18 +21,34 @@ router.post("/newTrip", async (req, res) => {
       const returnDateParts = req.body.return.split("/");
       const formattedDepartureDate = `${departureDateParts[2]}-${departureDateParts[1]}-${departureDateParts[0]}`;
       const formattedReturnDate = `${returnDateParts[2]}-${returnDateParts[1]}-${returnDateParts[0]}`;
-
+      const latitude = parseFloat(req.body.latitude);
+      const longitude = parseFloat(req.body.longitude);
       const newTrip = await new Travel({
         destination: req.body.destination,
         departure: formattedDepartureDate,
         return: formattedReturnDate,
+        location: {
+          type: "Point",
+          coordinates: [latitude, longitude],
+        },
       });
-      await newTrip.save();
-      res.status(200).json({ result: true, trip: newTrip });
+      const savedTrip = await newTrip.save();
+      //   console.log(savedTrip._id.toString());
+      res.status(200).json({ result: true, trip: savedTrip });
     }
   } catch (error) {
     console.error({ error: error.message });
-    res.status(400).json({ result: false, error: "Invalid Date Format" });
+    res.status(400).json({ result: false, error: "Wrong" });
+  }
+});
+router.get("/", async (req, res) => {
+  try {
+    const travels = await Travel.find().exec();
+    console.log(travels);
+    res.status(200).json({ result: true, trips: travels });
+  } catch (error) {
+    console.error({ error: error.message });
+    res.status(500).json({ result: false, error: "An error occured" });
   }
 });
 
