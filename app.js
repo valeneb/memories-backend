@@ -8,6 +8,7 @@ var logger = require("morgan");
 const fileUpload = require("express-fileupload");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
+const travelRouter = require("./routes/travel");
 // const authRoute = require("./routes/auth");
 cloudinary.config({
   cloud_name: "dbmg2zl7x",
@@ -30,5 +31,6 @@ app.use(express.static(path.join(__dirname, "public")));
 require("./config/database");
 app.use("/", indexRouter);
 app.use("/user", usersRouter);
+app.use("/travel", travelRouter);
 
 module.exports = app;
