@@ -36,7 +36,7 @@ const userSchema = mongoose.Schema({
   // name: String,
   // profilePicture: String,
 
-  travels: [{ type: mongoose.Schema.Types.ObjectId, ref: "travel" }],
+  travels: [{ type: mongoose.Schema.Types.ObjectId, ref: "travels" }],
 });
 const User = mongoose.model("users", userSchema);
 module.exports = User;

@@ -114,19 +114,20 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-router.get("/:id", async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const user = await User.findById(userId).populate("travels");
+// router.get("/:id", async (req, res) => {
+//   console.log(req);
+//   try {
+//     const userId = req.params._id;
+//     const user = await User.findById(userId).populate("travels");
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
 
-    res.status(200).json(user);
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ message: error.message });
-  }
-});
+//     res.status(200).json(user);
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(500).json({ message: error.message });
+//   }
+// });
 module.exports = router;

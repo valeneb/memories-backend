@@ -32,7 +32,7 @@ router.post("/newTravel", async (req, res) => {
           type: "Point",
           coordinates: [latitude, longitude],
         },
-        user: user._id.toString(),
+        user: user._id,
       });
       const savedTrip = await newTrip.save();
       //   console.log(savedTrip._id.toString());
@@ -59,6 +59,52 @@ router.get("/", async (req, res) => {
   } catch (error) {
     console.error({ error: error.message });
     res.status(500).json({ result: false, error: "An error occured" });
+  }
+});
+router.put("/:travelId", async (req, res) => {
+  try {
+    const travelId = req.params.travelId;
+
+    const updateFields = {};
+
+    if (req.body.destination) {
+      updateFields.destination = req.body.destination;
+    }
+    if (req.body.departure) {
+      const departureDateParts = req.body.departure.split("/");
+      const formattedDepartureDate = `${departureDateParts[2]}-${departureDateParts[1]}-${departureDateParts[0]}`;
+      // Convert date format if needed
+      // Example: "DD/MM/YYYY" to "YYYY-MM-DD"
+      updateFields.departure = formattedDepartureDate;
+    }
+    if (req.body.return) {
+      const returnDateParts = req.body.return.split("/");
+
+      const formattedReturnDate = `${returnDateParts[2]}-${returnDateParts[1]}-${returnDateParts[0]}`;
+
+      // Convert date format if needed
+      // Example: "DD/MM/YYYY" to "YYYY-MM-DD"
+      updateFields.return = formattedReturnDate;
+    }
+
+    // Use updateOne to update the travel item
+    const result = await Travel.updateOne(
+      { _id: travelId },
+      { $set: updateFields }
+    );
+
+    // Check if the travel item was found and updated
+    if (result.nModified === 0) {
+      return res.status(404).json({ result: false, error: "Travel not found" });
+    }
+
+    // Send a response indicating success
+    res
+      .status(200)
+      .json({ result: true, message: "Travel updated successfully" });
+  } catch (error) {
+    console.error({ error: error.message });
+    res.status(500).json({ result: false, error: "An error occurred" });
   }
 });
 
