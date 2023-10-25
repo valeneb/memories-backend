@@ -4,11 +4,12 @@ const User = require("../models/users");
 const Travel = require("../models/travels");
 
 router.post("/newTrip", async (req, res) => {
+  //   console.log(req.body);
   try {
     const user = await User.findOne({
       token: req.body.token,
     });
-
+    console.log(user._id);
     if (!user) {
       res.status(401).json({
         result: false,
@@ -24,7 +25,6 @@ router.post("/newTrip", async (req, res) => {
       const latitude = parseFloat(req.body.latitude);
       const longitude = parseFloat(req.body.longitude);
       const newTrip = await new Travel({
-        user: user.token,
         destination: req.body.destination,
         departure: formattedDepartureDate,
         return: formattedReturnDate,
@@ -32,6 +32,7 @@ router.post("/newTrip", async (req, res) => {
           type: "Point",
           coordinates: [latitude, longitude],
         },
+        user: user._id.toString(),
       });
       const savedTrip = await newTrip.save();
       //   console.log(savedTrip._id.toString());
@@ -53,7 +54,7 @@ router.get("/", async (req, res) => {
       return;
     }
     const travels = await Travel.find({ user: user._id }).exec();
-    console.log(travels);
+    console.log(travels._id);
     res.status(200).json({ result: true, trips: travels });
   } catch (error) {
     console.error({ error: error.message });

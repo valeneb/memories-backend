@@ -57,7 +57,7 @@ const travelSchema = new mongoose.Schema({
   },
   // coverImage: { type: mongoose.Schema.Types.Mixed, default: {} },
   // travelDiary: [{ type: mongoose.Schema.Types.ObjectId, ref: "Diary" }],
-  // user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   // travelPlanning: {
   //   flights: [flightSchema],
   //   carRental: [carSchema],
