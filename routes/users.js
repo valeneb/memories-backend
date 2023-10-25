@@ -81,7 +81,7 @@ router.post("/signup", fileUpload(), async (req, res) => {
 });
 
 // Define the login route
-router.post("/user/login", async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
 
@@ -95,12 +95,12 @@ router.post("/user/login", async (req, res) => {
       ) {
         res.status(200).json({
           user: {
-            _id: newUser._id,
-            token: newUser.token,
-            email: newUser.email,
-            account: newUser.account,
-            lastname: newUser.lastname,
-            firstname: newUser.firstname,
+            _id: user._id,
+            token: user.token,
+            email: user.email,
+            account: user.account,
+            lastname: user.lastname,
+            firstname: user.firstname,
           },
         });
       } else {
