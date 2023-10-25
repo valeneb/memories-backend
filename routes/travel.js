@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require("../models/users");
 const Travel = require("../models/travels");
 
-router.post("/newTrip", async (req, res) => {
+router.post("/newTravel", async (req, res) => {
   //   console.log(req.body);
   try {
     const user = await User.findOne({
