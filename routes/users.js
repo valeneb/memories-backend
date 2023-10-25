@@ -118,36 +118,37 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-router.get("/", async (req, res) => {
-  // console.log(req.query);
-  // console.log(req.query._id);
-  const userId = req.query._id;
-  // console.log(userId);
-  User.findById(userId)
-    // .populate("travels")
-    .then((data) => console.log(data));
-  Travel.findById(req.query._id).then((data) => {
-    console.log(data);
-  });
-  // console.log(travel);
-  // try {
+// router.get("/", async (req, res) => {
+// console.log(req.query);
+// console.log(req.query._id);
+// const userId = req.query._id;
+// // console.log(userId);
+// User.findById(userId)
+//   // .populate("travels")
+//   .then((data) => console.log(data));
+// Travel.findById(req.query._id).then((data) => {
+//   console.log(data);
+// });
+// console.log(travel);
+// try {
 
-  //   console.log(existingUser);
-  //   if (!existingUser) {
-  //     res.status(404).json({
-  //       result: false,
-  //       error: "User not found missing something or create an account",
-  //     });
-  //   } else {
-  //     const travelsIds = existingUser.travels.map((travel) => travel._id);
+//   console.log(existingUser);
+//   if (!existingUser) {
+//     res.status(404).json({
+//       result: false,
+//       error: "User not found missing something or create an account",
+//     });
+//   } else {
+//     const travelsIds = existingUser.travels.map((travel) => travel._id);
 
-  //     res.status(200).json({ result: true, travelsIds });
-  //   }
-  // } catch (error) {
-  //   console.log(error.message);
-  //   res.status(500).json({ message: error.message });
-  // }
-});
+//     res.status(200).json({ result: true, travelsIds });
+//   }
+// } catch (error) {
+//   console.log(error.message);
+//   res.status(500).json({ message: error.message });
+// }
+// });
+// TODO DELETE USER
 router.delete("/deleteUser", async (req, res) => {
   console.log(req.body);
   try {

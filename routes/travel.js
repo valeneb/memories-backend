@@ -135,9 +135,13 @@ router.delete("/deleteTrip", async (req, res) => {
     const deletedDestination = await Travel.deleteOne({
       _id: req.body._id,
     });
+    console.log(deletedDestination);
     if (deletedDestination.deletedCount > 0) {
-      // console.log(deletedDestination);
-      res.status(204).json({ result: true, travel: deletedDestination });
+      res.status(204).json({
+        result: true,
+        deletedDestination,
+        message: "Vous avez bien supprimé le voyage",
+      });
     } else {
       res.status(402).json({ result: false, message: "place not found" });
     }
