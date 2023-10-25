@@ -24,6 +24,7 @@ router.post("/newTrip", async (req, res) => {
       const latitude = parseFloat(req.body.latitude);
       const longitude = parseFloat(req.body.longitude);
       const newTrip = await new Travel({
+        user: user.token,
         destination: req.body.destination,
         departure: formattedDepartureDate,
         return: formattedReturnDate,
@@ -43,7 +44,15 @@ router.post("/newTrip", async (req, res) => {
 });
 router.get("/", async (req, res) => {
   try {
-    const travels = await Travel.find().exec();
+    const user = await User.findOne({ token: req.body.token });
+    if (!user) {
+      res.status(401).json({
+        result: false,
+        error: "User not found",
+      });
+      return;
+    }
+    const travels = await Travel.find({ user: user._id }).exec();
     console.log(travels);
     res.status(200).json({ result: true, trips: travels });
   } catch (error) {
