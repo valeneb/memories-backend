@@ -8,7 +8,7 @@ const userSchema = mongoose.Schema({
     },
     avatar: Object,
   },
-  username: String,
+
   firstname: String,
   lastname: String,
   email: {
@@ -36,7 +36,7 @@ const userSchema = mongoose.Schema({
   // name: String,
   // profilePicture: String,
 
-  travels: [{ type: mongoose.Schema.Types.ObjectId, ref: "travels" }],
+  travels: [{ type: mongoose.Schema.Types.ObjectId, ref: "travel" }],
 });
 const User = mongoose.model("users", userSchema);
 module.exports = User;

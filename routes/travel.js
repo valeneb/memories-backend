@@ -4,19 +4,20 @@ const User = require("../models/users");
 const Travel = require("../models/travels");
 // TODO CREATE NEWTRAVEL POST
 router.post("/newTravel", async (req, res) => {
-  //   console.log(req.body);
+  // console.log(req.body);
   try {
     const user = await User.findOne({
       token: req.body.token,
     });
-    console.log(user._id);
+    // console.log(user._id);
     if (!user) {
       res.status(401).json({
         result: false,
         error: "You have to be registered before creating a new programmation",
       });
       return;
-    } else {
+    }
+    if (user._id) {
       // Convertir les dates du format "DD/MM/YYYY" en format JavaScript valide "YYYY-MM-DD"
       const departureDateParts = req.body.departure.split("/");
       const returnDateParts = req.body.return.split("/");
@@ -34,8 +35,11 @@ router.post("/newTravel", async (req, res) => {
         },
         user: user._id,
       });
+      // console.log(user.id);
       const savedTrip = await newTrip.save();
-      //   console.log(savedTrip._id.toString());
+      user.travels.push(savedTrip._id);
+      await user.save();
+      // console.log(savedTrip._id.toString());
       res.status(200).json({ result: true, trip: savedTrip });
     }
   } catch (error) {
@@ -63,7 +67,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ result: false, error: "An error occured" });
   }
 });
-//! TODO update no workin for now
+// TODO UPDATE DATE DESTINATION DATE=>BOTH
 router.put("/update", async (req, res) => {
   // console.log(req.body);
   try {
@@ -116,7 +120,9 @@ router.put("/update", async (req, res) => {
     res.status(500).json({ result: false, error: "An error occurred" });
   }
 });
-router.delete("/delete", async (req, res) => {
+
+// TODO DELETE
+router.delete("/deleteTrip", async (req, res) => {
   // console.log(req.body);
   try {
     if (!req.body._id) {
@@ -129,8 +135,8 @@ router.delete("/delete", async (req, res) => {
       _id: req.body._id,
     });
     if (deletedDestination.deletedCount > 0) {
-      console.log(deletedDestination);
-      res.status(201).json({ result: true, travel: deletedDestination });
+      // console.log(deletedDestination);
+      res.status(204).json({ result: true, travel: deletedDestination });
     } else {
       res.status(402).json({ result: false, message: "place not found" });
     }

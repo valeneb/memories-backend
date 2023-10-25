@@ -8,6 +8,7 @@ const convertToBase64 = require("../utils/convertToBase64");
 const cloudinary = require("cloudinary").v2;
 
 const User = require("../models/users");
+const Travel = require("../models/travels");
 
 router.post("/signup", fileUpload(), async (req, res) => {
   // const { username, password, email, firstname, lastname } = req.body;
@@ -38,6 +39,7 @@ router.post("/signup", fileUpload(), async (req, res) => {
           account: {
             username: req.body.username,
           },
+          // travels: req.body._id,
 
           //!  password: password, ne pas enregistrer où le placer dans la nouvelle variable
         });
@@ -101,8 +103,10 @@ router.post("/login", async (req, res) => {
             account: user.account,
             lastname: user.lastname,
             firstname: user.firstname,
+            travels: user.travels._id,
           },
         });
+        // console.log(user);
       } else {
         res.status(401).json({ error: "Unauthorized" });
       }
@@ -114,20 +118,51 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-// router.get("/:id", async (req, res) => {
-//   console.log(req);
-//   try {
-//     const userId = req.params._id;
-//     const user = await User.findById(userId).populate("travels");
+router.get("/", async (req, res) => {
+  // console.log(req.query);
+  // console.log(req.query._id);
+  const userId = req.query._id;
+  // console.log(userId);
+  User.findById(userId)
+    // .populate("travels")
+    .then((data) => console.log(data));
+  Travel.findById(req.query._id).then((data) => {
+    console.log(data);
+  });
+  // console.log(travel);
+  // try {
 
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
+  //   console.log(existingUser);
+  //   if (!existingUser) {
+  //     res.status(404).json({
+  //       result: false,
+  //       error: "User not found missing something or create an account",
+  //     });
+  //   } else {
+  //     const travelsIds = existingUser.travels.map((travel) => travel._id);
 
-//     res.status(200).json(user);
-//   } catch (error) {
-//     console.log(error.message);
-//     res.status(500).json({ message: error.message });
-//   }
-// });
+  //     res.status(200).json({ result: true, travelsIds });
+  //   }
+  // } catch (error) {
+  //   console.log(error.message);
+  //   res.status(500).json({ message: error.message });
+  // }
+});
+router.delete("/deleteUser", async (req, res) => {
+  console.log(req.body);
+  try {
+    if (!req.body.token) {
+      res.status(401).json({ result: false, message: "user not found" });
+      return;
+    }
+    const userToDelete = await User.deleteOne({ token: req.body.token });
+    console.log(userToDelete);
+    if (userToDelete.deletedCount > 0) {
+      res.status(204).json({ reslut: true, user: userToDelete });
+    }
+  } catch (error) {
+    console.error({ error: error.message });
+    res.status(500).json({ result: false, error: "An error occurred" });
+  }
+});
 module.exports = router;
