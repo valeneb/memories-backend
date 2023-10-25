@@ -25,12 +25,8 @@ router.post("/newTrip", async (req, res) => {
 
       const newTrip = await new Travel({
         destination: req.body.destination,
-        departue: formattedDepartureDate,
+        departure: formattedDepartureDate,
         return: formattedReturnDate,
-        // location: {
-        //   type: "Point",
-        //   coordinates: [req.body.longitude, req.body.latitude],
-        // },
       });
       await newTrip.save();
       res.status(200).json({ result: true, trip: newTrip });

@@ -41,24 +41,24 @@ const otherSchema = new mongoose.Schema({
 
 const travelSchema = new mongoose.Schema({
   destination: String,
-  departure: Date,
-  return: Date,
-  coverImage: { type: mongoose.Schema.Types.Mixed, default: {} },
-  travelDiary: [{ type: mongoose.Schema.Types.ObjectId, ref: "Diary" }],
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  travelPlanning: {
-    flights: [flightSchema],
-    carRental: [carSchema],
-    accomodations: [accomodationSchema],
-    others: [otherSchema],
-  },
-  location: {
-    type: { type: String, default: "Point" },
-    coordinates: [Number],
-  },
+  departure: String,
+  return: String,
+  // coverImage: { type: mongoose.Schema.Types.Mixed, default: {} },
+  // travelDiary: [{ type: mongoose.Schema.Types.ObjectId, ref: "Diary" }],
+  // user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  // travelPlanning: {
+  //   flights: [flightSchema],
+  //   carRental: [carSchema],
+  //   accomodations: [accomodationSchema],
+  //   others: [otherSchema],
+  // },
+  // location: {
+  //   type: { type: String, default: "Point" },
+  //   coordinates: [Number],
+  // },
 });
 
-travelSchema.index({ location: "2dsphere" });
+// travelSchema.index({ location: "2dsphere" });
 
 const Travel = mongoose.model("travels", travelSchema);
 
