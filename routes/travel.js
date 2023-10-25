@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/users");
 const Travel = require("../models/travels");
-
+// TODO CREATE NEWTRAVEL POST
 router.post("/newTravel", async (req, res) => {
   //   console.log(req.body);
   try {
@@ -43,6 +43,8 @@ router.post("/newTravel", async (req, res) => {
     res.status(400).json({ result: false, error: "Wrong" });
   }
 });
+
+// TODO GET TO GET ALL TRAVELS
 router.get("/", async (req, res) => {
   try {
     const user = await User.findOne({ token: req.body.token });
@@ -61,51 +63,80 @@ router.get("/", async (req, res) => {
     res.status(500).json({ result: false, error: "An error occured" });
   }
 });
-router.put("/:travelId", async (req, res) => {
+//! TODO update no workin for now
+router.put("/update", async (req, res) => {
+  // console.log(req.body);
   try {
-    const travelId = req.params.travelId;
+    // Vérifiez si l'ID de l'objet à mettre à jour est fourni dans le corps de la requête.
+    if (!req.body._id) {
+      return res.status(400).json({
+        result: false,
+        error: "You must provide the _id of the travel to update.",
+      });
+    }
+    // console.log(req.body._id);
 
-    const updateFields = {};
+    //? à voir si il faut formater la date par la suite mais tout fonctionne
+    //!voir pour la gestion géospatiale si géré en front sinon peut avec mongoDB pour mpodifier une ville qui correspond à ses coordonnées géomètriquesmais complexe
 
+    //Créez un objet contenant les champs à mettre à jour.const updateFields = {};
     if (req.body.destination) {
       updateFields.destination = req.body.destination;
     }
     if (req.body.departure) {
-      const departureDateParts = req.body.departure.split("/");
-      const formattedDepartureDate = `${departureDateParts[2]}-${departureDateParts[1]}-${departureDateParts[0]}`;
-      // Convert date format if needed
-      // Example: "DD/MM/YYYY" to "YYYY-MM-DD"
-      updateFields.departure = formattedDepartureDate;
+      updateFields.departure = req.body.departure;
     }
     if (req.body.return) {
-      const returnDateParts = req.body.return.split("/");
-
-      const formattedReturnDate = `${returnDateParts[2]}-${returnDateParts[1]}-${returnDateParts[0]}`;
-
-      // Convert date format if needed
-      // Example: "DD/MM/YYYY" to "YYYY-MM-DD"
-      updateFields.return = formattedReturnDate;
+      updateFields.return = req.body.return;
+    }
+    if (req.body.latitude) {
+      updateFields.latitude = req.body.latitude;
+    }
+    if (req.body.longitude) {
+      updateFields.longitude = req.body.longitude;
     }
 
-    // Use updateOne to update the travel item
-    const result = await Travel.updateOne(
-      { _id: travelId },
-      { $set: updateFields }
+    // Effectuez la mise à jour en utilisant findOneAndUpdate.
+    const updatedTravel = await Travel.findOneAndUpdate(
+      { _id: req.body._id },
+      { $set: updateFields },
+      { new: true } // Pour obtenir le document mis à jour
     );
 
-    // Check if the travel item was found and updated
-    if (result.nModified === 0) {
-      return res.status(404).json({ result: false, error: "Travel not found" });
+    if (!updatedTravel) {
+      return res.status(404).json({
+        result: false,
+        error: "Travel not found",
+      });
     }
-
-    // Send a response indicating success
-    res
-      .status(200)
-      .json({ result: true, message: "Travel updated successfully" });
+    // console.log(res.result.nModified + " document(s) updated");
+    res.status(200).json({ result: true, trip: updatedTravel });
   } catch (error) {
     console.error({ error: error.message });
     res.status(500).json({ result: false, error: "An error occurred" });
   }
 });
-
+router.delete("/delete", async (req, res) => {
+  // console.log(req.body);
+  try {
+    if (!req.body._id) {
+      return res.status(400).json({
+        result: false,
+        error: "You must provide the _id of the travel to delete.",
+      });
+    }
+    const deletedDestination = await Travel.deleteOne({
+      _id: req.body._id,
+    });
+    if (deletedDestination.deletedCount > 0) {
+      console.log(deletedDestination);
+      res.status(201).json({ result: true, travel: deletedDestination });
+    } else {
+      res.status(402).json({ result: false, message: "place not found" });
+    }
+  } catch (error) {
+    console.error({ error: error.message });
+    res.status(500).json({ result: false, error: "An error occurred" });
+  }
+});
 module.exports = router;
