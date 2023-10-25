@@ -60,10 +60,14 @@ router.post("/signup", fileUpload(), async (req, res) => {
 
         await newUser.save();
         res.status(201).json({
-          _id: newUser._id,
-          token: newUser.token,
-          email: newUser.email,
-          account: newUser.account,
+          user: {
+            _id: newUser._id,
+            token: newUser.token,
+            email: newUser.email,
+            account: newUser.account,
+            lastname: newUser.lastname,
+            firstname: newUser.firstname,
+          },
         });
         console.log(newUser);
       } else {
@@ -90,9 +94,14 @@ router.post("/user/login", async (req, res) => {
         SHA256(req.body.password + user.salt).toString(encBase64) === user.hash
       ) {
         res.status(200).json({
-          _id: user._id,
-          token: user.token,
-          account: user.account,
+          user: {
+            _id: newUser._id,
+            token: newUser.token,
+            email: newUser.email,
+            account: newUser.account,
+            lastname: newUser.lastname,
+            firstname: newUser.firstname,
+          },
         });
       } else {
         res.status(401).json({ error: "Unauthorized" });
