@@ -83,7 +83,8 @@ router.put("/update", async (req, res) => {
     //? à voir si il faut formater la date par la suite mais tout fonctionne
     //!voir pour la gestion géospatiale si géré en front sinon peut avec mongoDB pour mpodifier une ville qui correspond à ses coordonnées géomètriquesmais complexe
 
-    //Créez un objet contenant les champs à mettre à jour.const updateFields = {};
+    //Créez un objet contenant les champs à mettre à jour.
+    const updateFields = {};
     if (req.body.destination) {
       updateFields.destination = req.body.destination;
     }
