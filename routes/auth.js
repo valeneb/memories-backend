@@ -36,16 +36,6 @@ router.get(
   })
 );
 
-router.get("/github", passport.authenticate("github", { scope: ["profile"] }));
-
-router.get(
-  "/github/callback",
-  passport.authenticate("github", {
-    successRedirect: CLIENT_URL,
-    failureRedirect: "/login/failed",
-  })
-);
-
 router.get(
   "/facebook",
   passport.authenticate("facebook", { scope: ["profile"] })

@@ -49,7 +49,7 @@ router.post("/newTravel", async (req, res) => {
 });
 
 // TODO GET TO GET ALL TRAVELS
-router.get("/", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const user = await User.findOne({ token: req.body.token });
     if (!user) {
@@ -137,7 +137,7 @@ router.delete("/deleteTrip", async (req, res) => {
     });
     console.log(deletedDestination);
     if (deletedDestination.deletedCount > 0) {
-      res.status(204).json({
+      res.status(200).json({
         result: true,
         deletedDestination,
         message: "Vous avez bien supprimé le voyage",

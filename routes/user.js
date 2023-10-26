@@ -3,16 +3,18 @@ const router = express.Router();
 const uid2 = require("uid2");
 const SHA256 = require("crypto-js/sha256");
 const encBase64 = require("crypto-js/enc-base64");
-const fileUpload = require("express-fileupload");
-const convertToBase64 = require("../utils/convertToBase64");
+
+// const convertToBase64 = require("../utils/convertToBase64");
 const cloudinary = require("cloudinary").v2;
 
 const User = require("../models/users");
-const Travel = require("../models/travels");
 
-router.post("/signup", fileUpload(), async (req, res) => {
+const convertToBase64 = (file) => {
+  return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
+};
+router.post("/signup", async (req, res) => {
   // const { username, password, email, firstname, lastname } = req.body;
-
+  // console.log(req.files);
   try {
     const user = await User.findOne({
       email: req.body.email,
@@ -27,8 +29,8 @@ router.post("/signup", fileUpload(), async (req, res) => {
         const salt = uid2(16);
 
         const hash = SHA256(req.body.password + salt).toString(encBase64);
-        console.log(hash);
-        console.log(salt);
+        // console.log(hash);
+        // console.log(salt);
         const newUser = await new User({
           salt: salt,
           hash: hash,
@@ -39,24 +41,25 @@ router.post("/signup", fileUpload(), async (req, res) => {
           account: {
             username: req.body.username,
           },
-          // travels: req.body._id,
 
           //!  password: password, ne pas enregistrer où le placer dans la nouvelle variable
         });
-        // if (!req.files || !req.files.avatar) {
-        //   return res.status(400).json({ message: "No file uploaded" });
-        // }
-
-        if (req.files?.avatar) {
+        if (!req.files || !req.files.avatar) {
+          return res.status(400).json({ message: "No file uploaded" });
+        }
+        // console.log(req.files.avatar);
+        if (req.files && req.files?.avatar) {
           const result = await cloudinary.uploader.upload(
             convertToBase64(req.files.avatar),
 
             {
-              folder: `api/memories/users/${newUser._id}`,
-              public_id: `avatar`,
+              folder: `c-572da241b15dac9e2f3c79aacc36f3/memories/users/${newUser._id}`,
+              public_id: "avatar",
             }
           );
-          console.log(req.files.avatar);
+          ///${newUser._id}
+          //! console.log(result); celui qui renvoie toutes les infos utilisateurs
+          // console.log(req.files.avatar);
           newUser.account.avatar = result;
         }
 
@@ -73,7 +76,7 @@ router.post("/signup", fileUpload(), async (req, res) => {
         });
         console.log(newUser);
       } else {
-        res.status(400).json({ message: "missing parameters" });
+        res.status(401).json({ message: "missing parameters" });
       }
     }
   } catch (error) {
@@ -118,36 +121,7 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-// router.get("/", async (req, res) => {
-// console.log(req.query);
-// console.log(req.query._id);
-// const userId = req.query._id;
-// // console.log(userId);
-// User.findById(userId)
-//   // .populate("travels")
-//   .then((data) => console.log(data));
-// Travel.findById(req.query._id).then((data) => {
-//   console.log(data);
-// });
-// console.log(travel);
-// try {
 
-//   console.log(existingUser);
-//   if (!existingUser) {
-//     res.status(404).json({
-//       result: false,
-//       error: "User not found missing something or create an account",
-//     });
-//   } else {
-//     const travelsIds = existingUser.travels.map((travel) => travel._id);
-
-//     res.status(200).json({ result: true, travelsIds });
-//   }
-// } catch (error) {
-//   console.log(error.message);
-//   res.status(500).json({ message: error.message });
-// }
-// });
 // TODO DELETE USER
 router.delete("/deleteUser", async (req, res) => {
   console.log(req.body);
@@ -157,7 +131,7 @@ router.delete("/deleteUser", async (req, res) => {
       return;
     }
     const userToDelete = await User.deleteOne({ token: req.body.token });
-    console.log(userToDelete);
+    // console.log(userToDelete);
     if (userToDelete.deletedCount > 0) {
       res.status(204).json({ reslut: true, user: userToDelete });
     }
@@ -166,4 +140,5 @@ router.delete("/deleteUser", async (req, res) => {
     res.status(500).json({ result: false, error: "An error occurred" });
   }
 });
+// TODO UPDATE USER PROFIL AND TRY AGAIN WITH AVATAR
 module.exports = router;
