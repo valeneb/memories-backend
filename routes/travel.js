@@ -85,8 +85,10 @@ router.put("/update", async (req, res) => {
 
     //Créez un objet contenant les champs à mettre à jour.
     const updateFields = {};
+    console.log(req.body.destination);
     if (req.body.destination) {
       updateFields.destination = req.body.destination;
+      console.log(updateFields.destination);
     }
     if (req.body.departure) {
       updateFields.departure = req.body.departure;
@@ -100,7 +102,7 @@ router.put("/update", async (req, res) => {
     if (req.body.longitude) {
       updateFields.longitude = req.body.longitude;
     }
-
+    console.log(updateFields);
     // Effectuez la mise à jour en utilisant findOneAndUpdate.
     const updatedTravel = await Travel.findOneAndUpdate(
       { _id: req.body._id },

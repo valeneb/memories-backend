@@ -23,7 +23,7 @@ router.post("/upload", async (req, res) => {
     const travelId = req.body._id;
     //!const travelId = mongoose.Types.ObjectId(req.body._id);//? "error": "Class constructor ObjectId cannot be invoked without 'new'"
     // console.log(travelId);
-    findTravel = await Travel.findById(travelId);
+    const findTravel = await Travel.findById(travelId);
     // console.log(findTravel); //!.ObjectKey ⬆️
     if (!findTravel) {
       res.status(401).json({
@@ -57,7 +57,7 @@ router.post("/upload", async (req, res) => {
         const resultToUpload = await cloudinary.uploader.upload(
           convertToBase64(req.files.picture),
           {
-            folder: `c-572da241b15dac9e2f3c79aacc36f3/media-explorer/memories/diary_images/${newDiary._id}`,
+            folder: `api/memories/diary_images/${newDiary._id}`,
             public_id: "diary",
           }
         );
@@ -81,7 +81,7 @@ router.post("/upload", async (req, res) => {
             const resultToUpload = await cloudinary.uploader.upload(
               convertToBase64(picture),
               {
-                folder: `c-572da241b15dac9e2f3c79aacc36f3/media-explorer/memories/diary_images/${newDiary._id}`,
+                folder: `api/memories/diary_images/${newDiary._id}`,
                 public_id: "diary",
               }
             );
@@ -91,7 +91,7 @@ router.post("/upload", async (req, res) => {
             const resultToUpload = await cloudinary.uploader.upload(
               convertToBase64(picture),
               {
-                folder: `c-572da241b15dac9e2f3c79aacc36f3/media-explorer/memories/diary_images/${newDiary._id}`,
+                folder: `memories/diary_images/${newDiary._id}`,
               }
             );
             newDiary.moment_pictures.push(resultToUpload);
@@ -115,34 +115,113 @@ router.post("/upload", async (req, res) => {
 
 // TODORoute pour récupérer tous les Diaries (Read)
 router.get("/", async (req, res) => {
+  //   console.log(req.query);
   try {
-    const diaries = await Diary.find();
-    res.status(200).json(diaries);
+    const travelId = req.query._id;
+    // console.log(travelId);
+    const findTravel = await Travel.findById(travelId);
+    console.log(findTravel.travelDiary);
+    if (!findTravel) {
+      res.status(403).json({ result: false, error: "travel not found" });
+    }
+
+    if (findTravel.travelDiary) {
+      const diaries = await Diary.find();
+      res.status(200).json(diaries);
+    } else {
+      res
+        .status(401)
+        .json({ result: false, error: "you have to register a new travel" });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 //TODO Route pour mettre à jour un Diary (Update)
-router.put("/:id", async (req, res) => {
+router.put("/", async (req, res) => {
+  //   console.log(req.body._id);
+  if (!req.body._id) {
+    return res.status(401).json({
+      result: false,
+      error: "diary file doesn't exist start to create something",
+    });
+  }
+  const diaryToModify = await Diary.findById(req.body._id);
+
   try {
-    const updatedDiary = await Diary.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    res.status(200).json(updatedDiary);
+    if (req.body.title) {
+      diaryToModify.title = req.body.title;
+    }
+    if (req.body.description) {
+      diaryToModify.description = req.body.description;
+    }
+    if (req.files?.picture) {
+      //   console.log(req.files);
+      //   console.log(diaryToModify.moment.public_id);
+      await cloudinary.uploader.destroy(diaryToModify.moment.public_id);
+
+      const resultUploadedMoment = await cloudinary.uploader.upload(
+        convertToBase64(req.files.picture),
+        {
+          folder: `api/memories/diary_images/${diaryToModify._id}`,
+          public_id: "diary",
+        }
+      );
+      diaryToModify.moment = resultUploadedMoment;
+      diaryToModify.moment_pictures[0] = resultUploadedMoment;
+      console.log(resultUploadedMoment);
+    }
+    const savedAndUpdatedDiary = await diaryToModify.save();
+    res.status(201).json({ result: true, diary: savedAndUpdatedDiary });
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
 //TODO Route pour supprimer un Diary (Delete)
-router.delete("/:id", async (req, res) => {
+// router.delete("/", async (req, res) => {
+//   console.log(req.query._id);
+//   try {
+//     await cloudinary.api.delete_resources_by_prefix(
+//       `api/memories/diary_images/${req.query.id}`
+//     );
+//     await cloudinary.api.delete_folder(
+//       `api/memories/diary_images/${req.query.id}`
+//     );
+//     await Offer.findById(req.query.id);
+//     // const diaryToDelete = await Diary.findByIdAndDelete(req.query._id);
+//     const diaryToDelete = await diaryToDelete.delete();
+//     res.status(202).json({ result: true, diary: diaryToDelete });
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+router.delete("/", async (req, res) => {
   try {
-    await Diary.findByIdAndDelete(req.params.id);
-    res.status(204).end();
+    const diaryId = req.query._id;
+    if (!diaryId) {
+      return res.status(400).json({ error: "ID de journal invalide" });
+    }
+
+    // Supprimez le journal en utilisant son ID
+    const diaryToDelete = await Diary.findByIdAndDelete(diaryId);
+
+    if (!diaryToDelete) {
+      return res.status(404).json({ error: "Journal non trouvé" });
+    }
+
+    // Supprimez les ressources Cloudinary associées si nécessaire
+    await cloudinary.api.delete_resources_by_prefix(
+      `api/memories/diary_images/${diaryId}`
+    );
+    await cloudinary.api.delete_folder(`api/memories/diary_images/${diaryId}`);
+
+    res.status(202).json({ result: true, diary: diaryToDelete });
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({ error: error.message });
   }
 });

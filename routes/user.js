@@ -53,7 +53,7 @@ router.post("/signup", async (req, res) => {
             convertToBase64(req.files.avatar),
 
             {
-              folder: `c-572da241b15dac9e2f3c79aacc36f3/memories/users/${newUser._id}`,
+              folder: `memories/users/${newUser._id}`,
               public_id: "avatar",
             }
           );
