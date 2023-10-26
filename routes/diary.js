@@ -15,6 +15,7 @@ const convertToBase64 = (file) => {
 };
 
 // Route pour créer un Diary (Create)
+//TODO DID IT
 router.post("/upload", async (req, res) => {
   //   console.log(req.body);
   //   console.log(req.files);
@@ -112,7 +113,7 @@ router.post("/upload", async (req, res) => {
 });
 //     }
 
-// Route pour récupérer tous les Diaries (Read)
+// TODORoute pour récupérer tous les Diaries (Read)
 router.get("/", async (req, res) => {
   try {
     const diaries = await Diary.find();
@@ -122,7 +123,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Route pour mettre à jour un Diary (Update)
+//TODO Route pour mettre à jour un Diary (Update)
 router.put("/:id", async (req, res) => {
   try {
     const updatedDiary = await Diary.findByIdAndUpdate(
@@ -136,7 +137,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// Route pour supprimer un Diary (Delete)
+//TODO Route pour supprimer un Diary (Delete)
 router.delete("/:id", async (req, res) => {
   try {
     await Diary.findByIdAndDelete(req.params.id);
