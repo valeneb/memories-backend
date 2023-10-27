@@ -67,7 +67,7 @@ router.post("/newTravel", async (req, res) => {
         newTrip.coverImage = resultToUpload;
       }
       // console.log(user.id);
-      console.log(result);
+      // console.log(result);
       const savedTrip = await newTrip.save();
       user.travels.push(savedTrip._id);
       await user.save();
