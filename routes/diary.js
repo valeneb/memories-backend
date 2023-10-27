@@ -3,6 +3,7 @@ const router = express.Router();
 const cloudinary = require("cloudinary").v2;
 const Diary = require("../models/diaries");
 const Travel = require("../models/travels");
+const convertToBase64 = require("../utils/convertToBase64");
 // const mongoose = require("mongoose");
 
 // cloudinary.config({
@@ -10,9 +11,9 @@ const Travel = require("../models/travels");
 //   api_key: "237518157193281",
 //   api_secret: "ucWJnMRH_GBvQcP6RQDgUsAnDJ4",
 // });
-const convertToBase64 = (file) => {
-  return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
-};
+// const convertToBase64 = (file) => {
+//   return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
+// };
 
 //TODO Route pour créer un Diary (Create)
 
@@ -165,13 +166,14 @@ router.put("/", async (req, res) => {
   try {
     if (req.body.title) {
       diaryToModify.title = req.body.title;
+      // console.log(req.body.title);
     }
     if (req.body.description) {
       diaryToModify.description = req.body.description;
     }
     if (req.files?.picture) {
-      //   console.log(req.files);
-      //   console.log(diaryToModify.moment.public_id);
+      // console.log(req.files);
+      console.log(diaryToModify.moment);
       await cloudinary.uploader.destroy(diaryToModify.moment.public_id);
 
       const resultUploadedMoment = await cloudinary.uploader.upload(
@@ -183,7 +185,7 @@ router.put("/", async (req, res) => {
       );
       diaryToModify.moment = resultUploadedMoment;
       diaryToModify.moment_pictures[0] = resultUploadedMoment;
-      console.log(resultUploadedMoment);
+      // console.log(resultUploadedMoment);
     }
     const savedAndUpdatedDiary = await diaryToModify.save();
     res.status(201).json({ result: true, diary: savedAndUpdatedDiary });
@@ -192,7 +194,7 @@ router.put("/", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+//TODO 653aa5dba47d6cdeebfa10ea/
 //TODO Route pour supprimer un Diary (Delete)
 
 router.delete("/", async (req, res) => {
@@ -204,18 +206,22 @@ router.delete("/", async (req, res) => {
 
     // Supprimez le journal en utilisant son ID
     const diaryToDelete = await Diary.findByIdAndDelete(diaryId);
-
+    console.log(diaryToDelete);
     if (!diaryToDelete) {
       return res.status(404).json({ error: "Journal non trouvé" });
     }
 
     // Supprimez les ressources Cloudinary associées si nécessaire
     await cloudinary.api.delete_resources_by_prefix(
-      `api/memories/diary_images/${diaryId}`
+      `memories/diary_images/${diaryId}`
     );
-    await cloudinary.api.delete_folder(`api/memories/diary_images/${diaryId}`);
+    await cloudinary.api.delete_folder(`memories/diary_images/${diaryId}`);
 
-    res.status(202).json({ result: true, diary: diaryToDelete });
+    res.status(200).json({
+      result: true,
+      diary: diaryId,
+      message: "le carnet a bien été supprimé",
+    });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: error.message });

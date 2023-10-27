@@ -43,9 +43,9 @@ router.post("/signup", async (req, res) => {
 
           //!  password: password, ne pas enregistrer où le placer dans la nouvelle variable
         });
-        if (!req.files || !req.files.avatar) {
-          return res.status(400).json({ message: "No file uploaded" });
-        }
+        // if (!req.files || !req.files.avatar) {
+        //   return res.status(400).json({ message: "No file uploaded" });
+        // }
         // console.log(req.files.avatar);
         if (req.files && req.files?.avatar) {
           const result = await cloudinary.uploader.upload(

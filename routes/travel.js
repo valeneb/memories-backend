@@ -3,14 +3,15 @@ const router = express.Router();
 const User = require("../models/users");
 const Travel = require("../models/travels");
 const cloudinary = require("cloudinary").v2;
+const convertToBase64 = require("../utils/convertToBase64");
 // cloudinary.config({
 //   cloud_name: "dbmg2zl7x",
 //   api_key: "237518157193281",
 //   api_secret: "ucWJnMRH_GBvQcP6RQDgUsAnDJ4",
 // });
-const convertToBase64 = (file) => {
-  return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
-};
+// const convertToBase64 = (file) => {
+//   return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
+// };
 // TODO CREATE NEWTRAVEL POST
 router.post("/newTravel", async (req, res) => {
   // console.log(req.body);
@@ -34,7 +35,8 @@ router.post("/newTravel", async (req, res) => {
       const formattedReturnDate = `${returnDateParts[2]}-${returnDateParts[1]}-${returnDateParts[0]}`;
       const latitude = parseFloat(req.body.latitude);
       const longitude = parseFloat(req.body.longitude);
-      const newTrip = await new Travel({
+
+      const newTrip = new Travel({
         destination: req.body.destination,
         departure: formattedDepartureDate,
         return: formattedReturnDate,
@@ -45,6 +47,7 @@ router.post("/newTravel", async (req, res) => {
         user: user._id,
       });
       // coverImage
+
       // console.log(req.files);
       if (!req.files || !req.files.image) {
         return res
@@ -64,6 +67,7 @@ router.post("/newTravel", async (req, res) => {
         newTrip.coverImage = resultToUpload;
       }
       // console.log(user.id);
+      console.log(result);
       const savedTrip = await newTrip.save();
       user.travels.push(savedTrip._id);
       await user.save();
@@ -109,55 +113,56 @@ router.put("/update", async (req, res) => {
       });
     }
     // console.log(req.body._id);
-
+    const travelToModify = await Travel.findById(req.body._id);
     //? à voir si il faut formater la date par la suite mais tout fonctionne
     //!voir pour la gestion géospatiale si géré en front sinon peut avec mongoDB pour mpodifier une ville qui correspond à ses coordonnées géomètriquesmais complexe
 
     //Créez un objet contenant les champs à mettre à jour.
-    const updateFields = {};
+    // const updateFields = {};
     // console.log(req.body.destination);
     if (req.body.destination) {
-      updateFields.destination = req.body.destination;
+      travelToModify.destination = req.body.destination;
       // console.log(updateFields.destination);
     }
     if (req.body.departure) {
-      updateFields.departure = req.body.departure;
+      travelToModify.departure = req.body.departure;
     }
     if (req.body.return) {
-      updateFields.return = req.body.return;
+      travelToModify.return = req.body.return;
     }
     if (req.body.latitude) {
-      updateFields.latitude = req.body.latitude;
+      travelToModify.latitude = req.body.latitude;
     }
     if (req.body.longitude) {
-      updateFields.longitude = req.body.longitude;
+      travelToModify.longitude = req.body.longitude;
     }
     if (req.files?.image) {
-      if (!updateFields.coverImage) {
-        updateFields.coverImage = {};
+      if (!travelToModify.coverImage) {
+        travelToModify.coverImage = {};
       }
       // console.log(req.files);
 
-      if (updateFields.coverImage.public_id) {
-        console.log(updateFields.coverImage.public_id);
-        await cloudinary.uploader.destroy(updateFields.coverImage.public_id);
+      if (travelToModify.coverImage.public_id) {
+        //!si ce console.log apparaît id undefined controle de la route post et le folder d'nvoie cloudinary à revoir
+        // console.log(travelToModify.coverImage.public_id);
+        await cloudinary.uploader.destroy(travelToModify.coverImage.public_id);
       }
 
       const uploadedCoverImage = await cloudinary.uploader.upload(
         convertToBase64(req.files.image),
         {
-          folder: `memories/travelsCover/${updateFields._id}`,
+          folder: `memories/travelsCover/${travelToModify._id}`,
           public_id: "coverImage",
         }
       );
-      console.log(uploadedCoverImage.public_id);
-      updateFields.coverImage = uploadedCoverImage;
+      // console.log(uploadedCoverImage);
+      travelToModify.coverImage = uploadedCoverImage;
     }
-    console.log(updateFields);
+    // console.log(travelToModify);
     // Effectuez la mise à jour en utilisant findOneAndUpdate.
     const updatedTravel = await Travel.findOneAndUpdate(
       { _id: req.body._id },
-      { $set: updateFields },
+      { $set: travelToModify },
       { new: true } // Pour obtenir le document mis à jour
     );
 
@@ -188,16 +193,19 @@ router.delete("/deleteTrip", async (req, res) => {
       });
     }
     const deletedDestination = await Travel.findByIdAndDelete(travelId);
-    console.log(deletedDestination);
+    // console.log(deletedDestination);
     if (!deletedDestination) {
       res.status(402).json({ result: false, message: "place not found" });
-    } else {
-      res.status(200).json({
-        result: true,
-        deletedDestination,
-        message: "Vous avez bien supprimé le voyage",
-      });
     }
+    await cloudinary.api.delete_resources_by_prefix(
+      `memories/travelsCover/${travelId}`
+    );
+    await cloudinary.api.delete_folder(`memories/travelsCover/${travelId}`);
+    res.status(200).json({
+      result: true,
+      travel: deletedDestination,
+      message: "Vous avez bien supprimé le voyage",
+    });
   } catch (error) {
     console.error({ error: error.message });
     res.status(500).json({ result: false, error: "An error occurred" });
