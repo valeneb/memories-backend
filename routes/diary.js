@@ -36,7 +36,7 @@ router.post("/newDiary", async (req, res) => {
         travel: findTravel,
       });
       const savedDiary = await newDiary.save();
-      console.log(newDiary);
+      // console.log(newDiary);
       findTravel.travelDiary.push(savedDiary._id);
       res.status(200).json({ result: true, saved: newDiary });
     }
@@ -124,7 +124,7 @@ router.get("/", async (req, res) => {
   //   console.log(req.query);
   try {
     const travelId = req.query._id;
-    // console.log(travelId);
+    console.log(travelId);
     const findTravel = await Travel.findById(travelId);
     console.log(findTravel.travelDiary);
     if (!findTravel) {
@@ -132,7 +132,7 @@ router.get("/", async (req, res) => {
     }
 
     if (findTravel.travelDiary) {
-      const diaries = await Diary.find(travelId);
+      const diaries = await Diary.find(findTravel);
       res.status(200).json(diaries);
     } else {
       res
