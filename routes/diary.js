@@ -41,7 +41,7 @@ router.post("/newDiary", async (req, res) => {
       const newDiary = new Diary({
         title: req.body.title || "",
         description: req.body.description || "",
-        // travel: findTravel,
+        travel: findTravel,
       });
       await newDiary.save();
       console.log(newDiary);
@@ -56,7 +56,7 @@ router.post("/newDiary", async (req, res) => {
       const newDiary = new Diary({
         title: req.body.title || "",
         description: req.body.description || "",
-        // travel: findTravel,
+        travel: findTravel,
       });
 
       if (!Array.isArray(req.files.picture)) {
