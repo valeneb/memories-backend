@@ -8,117 +8,195 @@ const convertToBase64 = require("../utils/convertToBase64");
 
 //TODO Route pour créer un Diary (Create)
 
+// router.post("/newDiary", async (req, res) => {
+//   //   console.log(req.body);
+//   //   console.log(req.files);
+//   try {
+//     const travelId = req.body._id;
+//     //!const travelId = mongoose.Types.ObjectId(req.body._id);   //? "error": "Class constructor ObjectId cannot be invoked without 'new'"
+//     // console.log(travelId);
+//     const findTravel = await Travel.findById(travelId);
+//     // console.log(findTravel); //!.ObjectKey ⬆️
+//     if (!findTravel) {
+//       res.status(401).json({
+//         result: false,
+//         error: "you have to create a newTravel before creating diary",
+//       });
+//     }
+//     //!req.files?.picture est du optional chaining : si req n'a pas de clef files et qu'on n'avait pas mis le ?, le fait de chercher à lire sa clef picture provoquerait une erreur. Grâce à l'optional chaining, si files n'existe pas, la clef picture n'est pas lue et on ne passe pas dans le if.
+//     if (
+//       (findTravel._id && !req.files?.picture) ||
+//       (req.body.title === "" && req.body.title) ||
+//       (req.body.description === "" && req.body.description)
+//     ) {
+//       const newDiary = new Diary({
+//         title: req.body.title || "" || null,
+//         description: req.body.description || "" || null,
+//         travel: findTravel,
+//       });
+//       const savedDiary = await newDiary.save();
+//       // console.log(newDiary);
+//       findTravel.travelDiary.push(savedDiary._id);
+//       await findTravel.save();
+//       res.status(200).json({ result: true, saved: newDiary });
+//       return;
+//     }
+//     if (
+//       findTravel._id &&
+//       req.files?.picture
+//       //  || Object.keys(req.files.picture).lentgh === null
+//     ) {
+//       // console.log(Object.keys(req.files.picture));
+//       const newDiary = new Diary({
+//         title: req.body.title || "" || null,
+//         description: req.body.description || "" || null,
+//         travel: findTravel,
+//       });
+
+//       if (!Array.isArray(req.files.picture)) {
+//         if (req.files.picture.mimetype.slice(0, 5) !== "image") {
+//           return res.status(400).json({
+//             result: false,
+//             message:
+//               "You must send image in a good format/jpeg/jpg/png blablabla",
+//           });
+//         }
+//         const resultToUpload = await cloudinary.uploader.upload(
+//           convertToBase64(req.files.picture),
+//           {
+//             folder: `memories/diary_images/${newDiary._id}`,
+//             public_id: "diary",
+//           }
+//         );
+//         // console.log(resultToUpload);
+
+//         newDiary.moment = resultToUpload;
+//         // console.log(newDiary.moment);
+//         // console.log(newDiary.moment_pictures.push(resultToUpload)); //!doit afficher le chiffre 1 nbr d'élément
+//         newDiary.moment_pictures.push(resultToUpload);
+//       } else {
+//         for (let i = 0; i < req.files.picture.length; i++) {
+//           const picture = req.files.picture[i];
+//           //quand requête x photos dans mon form-data postman   console.log(`je fais un tour de: ${req.files.picture[i]}${i}`);
+//           if (picture.mimetype.slice(0, 5) !== "image") {
+//             return res.status(400).json({
+//               message: "You must send images in a good format blablabla",
+//             });
+//           }
+//           //   console.log(i);
+//           if (i === 0) {
+//             const resultToUpload = await cloudinary.uploader.upload(
+//               convertToBase64(picture),
+//               {
+//                 folder: `memories/diary_images/${newDiary._id}`,
+//                 public_id: "diary",
+//               }
+//             );
+//             newDiary.moment = resultToUpload;
+//             newDiary.moment_pictures.push(resultToUpload);
+//           } else {
+//             const resultToUpload = await cloudinary.uploader.upload(
+//               convertToBase64(picture),
+//               {
+//                 folder: `memories/diary_images/${newDiary._id}`,
+//               }
+//             );
+//             newDiary.moment_pictures.push(resultToUpload);
+//           }
+//         }
+//       }
+
+//       const savedDiary = await newDiary.save();
+
+//       findTravel.travelDiary.push(savedDiary._id);
+//       await findTravel.save();
+//       res.status(201).json({ result: true, saved: savedDiary });
+//       //   findTravel.travel.push(savedDiary._id);
+//     }
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
+// TODO SIMPLY ROUTE POST
 router.post("/newDiary", async (req, res) => {
-  //   console.log(req.body);
-  //   console.log(req.files);
   try {
     const travelId = req.body._id;
-    //!const travelId = mongoose.Types.ObjectId(req.body._id);   //? "error": "Class constructor ObjectId cannot be invoked without 'new'"
-    // console.log(travelId);
     const findTravel = await Travel.findById(travelId);
-    // console.log(findTravel); //!.ObjectKey ⬆️
-    if (!findTravel) {
-      res.status(401).json({
-        result: false,
-        error: "you have to create a newTravel before creating diary",
-      });
-    }
-    //!req.files?.picture est du optional chaining : si req n'a pas de clef files et qu'on n'avait pas mis le ?, le fait de chercher à lire sa clef picture provoquerait une erreur. Grâce à l'optional chaining, si files n'existe pas, la clef picture n'est pas lue et on ne passe pas dans le if.
-    if (
-      (findTravel._id && !req.files?.picture) ||
-      (req.body.title === "" && req.body.title) ||
-      (req.body.description === "" && req.body.description)
-    ) {
-      const newDiary = new Diary({
-        title: req.body.title || "",
-        description: req.body.description || "",
-        travel: findTravel,
-      });
-      const savedDiary = await newDiary.save();
-      // console.log(newDiary);
-      findTravel.travelDiary.push(savedDiary._id);
-      await findTravel.save();
-      res.status(200).json({ result: true, saved: newDiary });
-      return;
-    }
-    if (
-      findTravel._id &&
-      req.files?.picture
-      //  || Object.keys(req.files.picture).lentgh === null
-    ) {
-      // console.log(Object.keys(req.files.picture));
-      const newDiary = new Diary({
-        title: req.body.title || "" || null,
-        description: req.body.description || "" || null,
-        travel: findTravel,
-      });
 
+    if (!findTravel) {
+      return res.status(401).json({
+        result: false,
+        error: "You have to create a newTravel before creating a diary.",
+      });
+    }
+
+    const title = req.body.title || "";
+    const description = req.body.description || "";
+
+    const newDiary = new Diary({
+      title,
+      description,
+      travel: findTravel,
+    });
+
+    if (req.files?.picture) {
       if (!Array.isArray(req.files.picture)) {
-        if (req.files.picture.mimetype.slice(0, 5) !== "image") {
+        const picture = req.files.picture;
+
+        if (picture.mimetype.slice(0, 5) !== "image") {
           return res.status(400).json({
             result: false,
             message:
-              "You must send image in a good format/jpeg/jpg/png blablabla",
+              "You must send an image in a good format (jpeg/jpg/png, etc.).",
           });
         }
+
         const resultToUpload = await cloudinary.uploader.upload(
-          convertToBase64(req.files.picture),
+          convertToBase64(picture),
           {
             folder: `memories/diary_images/${newDiary._id}`,
             public_id: "diary",
           }
         );
-        // console.log(resultToUpload);
 
         newDiary.moment = resultToUpload;
-        // console.log(newDiary.moment);
-        // console.log(newDiary.moment_pictures.push(resultToUpload)); //!doit afficher le chiffre 1 nbr d'élément
         newDiary.moment_pictures.push(resultToUpload);
       } else {
         for (let i = 0; i < req.files.picture.length; i++) {
           const picture = req.files.picture[i];
-          //quand requête x photos dans mon form-data postman   console.log(`je fais un tour de: ${req.files.picture[i]}${i}`);
+
           if (picture.mimetype.slice(0, 5) !== "image") {
             return res.status(400).json({
-              message: "You must send images in a good format blablabla",
+              message:
+                "You must send images in a good format (jpeg/jpg/png, etc.).",
             });
           }
-          //   console.log(i);
-          if (i === 0) {
-            const resultToUpload = await cloudinary.uploader.upload(
-              convertToBase64(picture),
-              {
-                folder: `memories/diary_images/${newDiary._id}`,
-                public_id: "diary",
-              }
-            );
-            newDiary.moment = resultToUpload;
-            newDiary.moment_pictures.push(resultToUpload);
-          } else {
-            const resultToUpload = await cloudinary.uploader.upload(
-              convertToBase64(picture),
-              {
-                folder: `memories/diary_images/${newDiary._id}`,
-              }
-            );
-            newDiary.moment_pictures.push(resultToUpload);
-          }
+
+          const resultToUpload = await cloudinary.uploader.upload(
+            convertToBase64(picture),
+            {
+              folder: `memories/diary_images/${newDiary._id}`,
+            }
+          );
+
+          newDiary.moment_pictures.push(resultToUpload);
         }
       }
-
-      const savedDiary = await newDiary.save();
-
-      findTravel.travelDiary.push(savedDiary._id);
-      await findTravel.save();
-      res.status(201).json({ result: true, saved: savedDiary });
-      //   findTravel.travel.push(savedDiary._id);
     }
+
+    const savedDiary = await newDiary.save();
+
+    findTravel.travelDiary.push(savedDiary._id);
+    await findTravel.save();
+
+    res.status(201).json({ result: true, saved: savedDiary });
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
     res.status(500).json({ error: error.message });
   }
 });
-//     }
 
 // TODO Route pour récupérer tous les Diaries (Read)
 router.get("/", async (req, res) => {
