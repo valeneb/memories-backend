@@ -115,10 +115,10 @@ router.put("/update", async (req, res) => {
 
     //Créez un objet contenant les champs à mettre à jour.
     const updateFields = {};
-    console.log(req.body.destination);
+    // console.log(req.body.destination);
     if (req.body.destination) {
       updateFields.destination = req.body.destination;
-      console.log(updateFields.destination);
+      // console.log(updateFields.destination);
     }
     if (req.body.departure) {
       updateFields.departure = req.body.departure;
@@ -133,15 +133,23 @@ router.put("/update", async (req, res) => {
       updateFields.longitude = req.body.longitude;
     }
     if (req.files?.image) {
-      await cloudinary.uploader.destroy(updateFields.coverImage.public_id);
+      if (!updateFields.coverImage) {
+        updateFields.coverImage = {};
+      }
+      // console.log(req.files);
+      console.log(updateFields.coverImage.public_id);
+      if (updateFields.coverImage.public_id) {
+        await cloudinary.uploader.destroy(updateFields.coverImage.public_id);
+      }
+
       const uploadedCoverImage = await cloudinary.uploader.upload(
-        converttoBase64(req.files.image),
+        convertToBase64(req.files.image),
         {
           folder: `memories/travelsCover/${updateFields._id}`,
           public_id: "coverImage",
         }
       );
-      console.log(uploadedCoverImage);
+      console.log(uploadedCoverImage.public_id);
       updateFields.coverImage = uploadedCoverImage;
     }
     console.log(updateFields);
@@ -158,6 +166,7 @@ router.put("/update", async (req, res) => {
         error: "Travel not found",
       });
     }
+
     // console.log(res.result.nModified + " document(s) updated");
     res.status(200).json({ result: true, trip: updatedTravel });
   } catch (error) {

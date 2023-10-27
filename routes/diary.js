@@ -10,9 +10,9 @@ const Travel = require("../models/travels");
 //   api_key: "237518157193281",
 //   api_secret: "ucWJnMRH_GBvQcP6RQDgUsAnDJ4",
 // });
-// const convertToBase64 = (file) => {
-//   return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
-// };
+const convertToBase64 = (file) => {
+  return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
+};
 
 //TODO Route pour créer un Diary (Create)
 
@@ -33,8 +33,22 @@ router.post("/newDiary", async (req, res) => {
       return;
     }
     //!req.files?.picture est du optional chaining : si req n'a pas de clef files et qu'on n'avait pas mis le ?, le fait de chercher à lire sa clef picture provoquerait une erreur. Grâce à l'optional chaining, si files n'existe pas, la clef picture n'est pas lue et on ne passe pas dans le if.
-
-    if (findTravel._id) {
+    if (
+      findTravel._id &&
+      !req.files?.picture &&
+      req.body.title &&
+      req.body.description
+    ) {
+      const newDiary = new Diary({
+        title: req.body.title,
+        description: req.body.description,
+        travel: findTravel,
+      });
+      await newDiary.save();
+      // console.log(newDiary);
+      return res.status(200).json({ result: true, saved: newDiary });
+    }
+    if (findTravel._id && req.files?.picture) {
       const newDiary = new Diary({
         title: req.body.title,
         description: req.body.description,
