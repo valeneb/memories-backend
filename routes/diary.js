@@ -34,10 +34,9 @@ router.post("/newDiary", async (req, res) => {
     }
     //!req.files?.picture est du optional chaining : si req n'a pas de clef files et qu'on n'avait pas mis le ?, le fait de chercher à lire sa clef picture provoquerait une erreur. Grâce à l'optional chaining, si files n'existe pas, la clef picture n'est pas lue et on ne passe pas dans le if.
     if (
-      findTravel._id &&
-      !req.files?.picture &&
-      req.body.title &&
-      req.body.description
+      (findTravel._id && !req.files?.picture && req.body.title) ||
+      (req.body.title === "" && req.body.description) ||
+      req.body.description === ""
     ) {
       const newDiary = new Diary({
         title: req.body.title,

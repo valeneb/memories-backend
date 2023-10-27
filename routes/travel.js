@@ -137,8 +137,9 @@ router.put("/update", async (req, res) => {
         updateFields.coverImage = {};
       }
       // console.log(req.files);
-      console.log(updateFields.coverImage.public_id);
+
       if (updateFields.coverImage.public_id) {
+        console.log(updateFields.coverImage.public_id);
         await cloudinary.uploader.destroy(updateFields.coverImage.public_id);
       }
 
@@ -177,26 +178,25 @@ router.put("/update", async (req, res) => {
 
 // TODO DELETE
 router.delete("/deleteTrip", async (req, res) => {
+  const travelId = req.query._id;
   // console.log(req.body);
   try {
-    if (!req.body._id) {
+    if (!travelId) {
       return res.status(400).json({
         result: false,
         error: "You must provide the _id of the travel to delete.",
       });
     }
-    const deletedDestination = await Travel.deleteOne({
-      _id: req.body._id,
-    });
+    const deletedDestination = await Travel.findByIdAndDelete(travelId);
     console.log(deletedDestination);
-    if (deletedDestination.deletedCount > 0) {
+    if (!deletedDestination) {
+      res.status(402).json({ result: false, message: "place not found" });
+    } else {
       res.status(200).json({
         result: true,
         deletedDestination,
         message: "Vous avez bien supprimé le voyage",
       });
-    } else {
-      res.status(402).json({ result: false, message: "place not found" });
     }
   } catch (error) {
     console.error({ error: error.message });
