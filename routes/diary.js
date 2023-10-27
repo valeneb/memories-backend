@@ -22,7 +22,6 @@ router.post("/newDiary", async (req, res) => {
         result: false,
         error: "you have to create a newTravel before creating diary",
       });
-      return;
     }
     //!req.files?.picture est du optional chaining : si req n'a pas de clef files et qu'on n'avait pas mis le ?, le fait de chercher à lire sa clef picture provoquerait une erreur. Grâce à l'optional chaining, si files n'existe pas, la clef picture n'est pas lue et on ne passe pas dans le if.
     if (
