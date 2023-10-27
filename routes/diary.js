@@ -212,7 +212,7 @@ router.get("/", async (req, res) => {
 
     if (findTravel.travelDiary) {
       console.log(findTravel._id);
-      const diaries = await Diary.find(findTravel._id);
+      const diaries = await Diary.find({ travel: findTravel._id });
       res.status(200).json({ result: true, diaries: diaries });
     } else {
       res
