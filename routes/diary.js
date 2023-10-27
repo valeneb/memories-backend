@@ -211,7 +211,8 @@ router.get("/", async (req, res) => {
     }
 
     if (findTravel.travelDiary) {
-      const diaries = await Diary.find(findTravel);
+      console.log(findTravel._id);
+      const diaries = await Diary.find(findTravel._id);
       res.status(200).json({ result: true, diaries: diaries });
     } else {
       res
