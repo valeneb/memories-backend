@@ -45,7 +45,7 @@ router.post("/newTravel", async (req, res) => {
         user: user._id,
       });
       // coverImage
-      console.log(req.files);
+      // console.log(req.files);
       if (!req.files || !req.files.image) {
         return res
           .status(400)
@@ -59,7 +59,9 @@ router.post("/newTravel", async (req, res) => {
             public_id: "coverImage",
           }
         );
-        console.log(resultToUpload);
+        // console.log(resultToUpload);
+        // console.log((newTrip.coverImage = resultToUpload));
+        newTrip.coverImage = resultToUpload;
       }
       // console.log(user.id);
       const savedTrip = await newTrip.save();
@@ -75,9 +77,11 @@ router.post("/newTravel", async (req, res) => {
 });
 
 // TODO GET but POST because the front doesn't want to accept to GET method by req.body TO GET ALL TRAVELS
-router.post("/", async (req, res) => {
+router.get("/", async (req, res) => {
+  console.log(req.query);
   try {
-    const user = await User.findOne({ token: req.body.token });
+    const user = await User.findOne({ token: req.query.token });
+    // console.log(user);
     if (!user) {
       res.status(401).json({
         result: false,
@@ -86,7 +90,7 @@ router.post("/", async (req, res) => {
       return;
     }
     const travels = await Travel.find({ user: user._id }).exec();
-    console.log(travels);
+    // console.log(travels);
     res.status(200).json({ result: true, trips: travels });
   } catch (error) {
     console.error({ error: error.message });
@@ -127,6 +131,18 @@ router.put("/update", async (req, res) => {
     }
     if (req.body.longitude) {
       updateFields.longitude = req.body.longitude;
+    }
+    if (req.files?.image) {
+      await cloudinary.uploader.destroy(updateFields.coverImage.public_id);
+      const uploadedCoverImage = await cloudinary.uploader.upload(
+        converttoBase64(req.files.image),
+        {
+          folder: `memories/travelsCover/${updateFields._id}`,
+          public_id: "coverImage",
+        }
+      );
+      console.log(uploadedCoverImage);
+      updateFields.coverImage = uploadedCoverImage;
     }
     console.log(updateFields);
     // Effectuez la mise à jour en utilisant findOneAndUpdate.

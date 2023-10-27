@@ -16,7 +16,7 @@ const Travel = require("../models/travels");
 
 //TODO Route pour créer un Diary (Create)
 
-router.post("/upload", async (req, res) => {
+router.post("/newDiary", async (req, res) => {
   //   console.log(req.body);
   //   console.log(req.files);
   try {
@@ -34,12 +34,7 @@ router.post("/upload", async (req, res) => {
     }
     //!req.files?.picture est du optional chaining : si req n'a pas de clef files et qu'on n'avait pas mis le ?, le fait de chercher à lire sa clef picture provoquerait une erreur. Grâce à l'optional chaining, si files n'existe pas, la clef picture n'est pas lue et on ne passe pas dans le if.
 
-    if (
-      findTravel._id &&
-      req.body.title &&
-      req.body.description &&
-      req.files?.picture
-    ) {
+    if (findTravel._id) {
       const newDiary = new Diary({
         title: req.body.title,
         description: req.body.description,
