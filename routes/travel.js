@@ -2,6 +2,15 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/users");
 const Travel = require("../models/travels");
+const cloudinary = require("cloudinary").v2;
+// cloudinary.config({
+//   cloud_name: "dbmg2zl7x",
+//   api_key: "237518157193281",
+//   api_secret: "ucWJnMRH_GBvQcP6RQDgUsAnDJ4",
+// });
+const convertToBase64 = (file) => {
+  return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
+};
 // TODO CREATE NEWTRAVEL POST
 router.post("/newTravel", async (req, res) => {
   // console.log(req.body);
@@ -35,6 +44,23 @@ router.post("/newTravel", async (req, res) => {
         },
         user: user._id,
       });
+      // coverImage
+      console.log(req.files);
+      if (!req.files || !req.files.image) {
+        return res
+          .status(400)
+          .json({ result: false, message: "No file uploaded" });
+      }
+      if (req.files || res.files?.image) {
+        const resultToUpload = await cloudinary.uploader.upload(
+          convertToBase64(req.files.image),
+          {
+            folder: `memories/travelsCover/${newTrip._id}`,
+            public_id: "coverImage",
+          }
+        );
+        console.log(resultToUpload);
+      }
       // console.log(user.id);
       const savedTrip = await newTrip.save();
       user.travels.push(savedTrip._id);
@@ -48,7 +74,7 @@ router.post("/newTravel", async (req, res) => {
   }
 });
 
-// TODO GET TO GET ALL TRAVELS
+// TODO GET but POST because the front doesn't want to accept to GET method by req.body TO GET ALL TRAVELS
 router.post("/", async (req, res) => {
   try {
     const user = await User.findOne({ token: req.body.token });
@@ -60,7 +86,7 @@ router.post("/", async (req, res) => {
       return;
     }
     const travels = await Travel.find({ user: user._id }).exec();
-    console.log(travels._id);
+    console.log(travels);
     res.status(200).json({ result: true, trips: travels });
   } catch (error) {
     console.error({ error: error.message });
