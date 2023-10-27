@@ -4,14 +4,7 @@ const User = require("../models/users");
 const Travel = require("../models/travels");
 const cloudinary = require("cloudinary").v2;
 const convertToBase64 = require("../utils/convertToBase64");
-// cloudinary.config({
-//   cloud_name: "dbmg2zl7x",
-//   api_key: "237518157193281",
-//   api_secret: "ucWJnMRH_GBvQcP6RQDgUsAnDJ4",
-// });
-// const convertToBase64 = (file) => {
-//   return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
-// };
+
 // TODO CREATE NEWTRAVEL POST
 router.post("/newTravel", async (req, res) => {
   // console.log(req.body);

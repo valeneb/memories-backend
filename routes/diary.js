@@ -3,17 +3,8 @@ const router = express.Router();
 const cloudinary = require("cloudinary").v2;
 const Diary = require("../models/diaries");
 const Travel = require("../models/travels");
-// const convertToBase64 = require("../utils/convertToBase64");
+const convertToBase64 = require("../utils/convertToBase64");
 // const mongoose = require("mongoose");
-
-cloudinary.config({
-  cloud_name: "dbmg2zl7x",
-  api_key: "237518157193281",
-  api_secret: "ucWJnMRH_GBvQcP6RQDgUsAnDJ4",
-});
-const convertToBase64 = (file) => {
-  return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
-};
 
 //TODO Route pour créer un Diary (Create)
 
@@ -44,8 +35,9 @@ router.post("/newDiary", async (req, res) => {
         description: req.body.description || "",
         travel: findTravel,
       });
-      await newDiary.save();
+      const savedDiary = await newDiary.save();
       console.log(newDiary);
+      findTravel.travelDiary.push(savedDiary._id);
       res.status(200).json({ result: true, saved: newDiary });
     }
     if (
@@ -140,7 +132,7 @@ router.get("/", async (req, res) => {
     }
 
     if (findTravel.travelDiary) {
-      const diaries = await Diary.find();
+      const diaries = await Diary.find(travelId);
       res.status(200).json(diaries);
     } else {
       res
