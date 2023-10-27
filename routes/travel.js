@@ -49,11 +49,11 @@ router.post("/newTravel", async (req, res) => {
       // coverImage
 
       // console.log(req.files);
-      if (!req.files || !req.files.image) {
-        return res
-          .status(400)
-          .json({ result: false, message: "No file uploaded" });
-      }
+      // if (!req.files || !req.files.image) {
+      //   return res
+      //     .status(400)
+      //     .json({ result: false, message: "No file uploaded" });
+      // }
       if (req.files || res.files?.image) {
         const resultToUpload = await cloudinary.uploader.upload(
           convertToBase64(req.files.image),

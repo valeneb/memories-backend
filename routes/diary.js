@@ -3,17 +3,17 @@ const router = express.Router();
 const cloudinary = require("cloudinary").v2;
 const Diary = require("../models/diaries");
 const Travel = require("../models/travels");
-const convertToBase64 = require("../utils/convertToBase64");
+// const convertToBase64 = require("../utils/convertToBase64");
 // const mongoose = require("mongoose");
 
-// cloudinary.config({
-//   cloud_name: "dbmg2zl7x",
-//   api_key: "237518157193281",
-//   api_secret: "ucWJnMRH_GBvQcP6RQDgUsAnDJ4",
-// });
-// const convertToBase64 = (file) => {
-//   return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
-// };
+cloudinary.config({
+  cloud_name: "dbmg2zl7x",
+  api_key: "237518157193281",
+  api_secret: "ucWJnMRH_GBvQcP6RQDgUsAnDJ4",
+});
+const convertToBase64 = (file) => {
+  return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
+};
 
 //TODO Route pour créer un Diary (Create)
 
@@ -206,7 +206,7 @@ router.delete("/", async (req, res) => {
 
     // Supprimez le journal en utilisant son ID
     const diaryToDelete = await Diary.findByIdAndDelete(diaryId);
-    console.log(diaryToDelete);
+    console.log("Carnet Supprimé :", diaryToDelete);
     if (!diaryToDelete) {
       return res.status(404).json({ error: "Journal non trouvé" });
     }
@@ -219,7 +219,7 @@ router.delete("/", async (req, res) => {
 
     res.status(200).json({
       result: true,
-      diary: diaryId,
+      diary: diaryToDelete,
       message: "le carnet a bien été supprimé",
     });
   } catch (error) {
