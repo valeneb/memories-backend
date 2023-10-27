@@ -198,12 +198,11 @@ router.put("/", async (req, res) => {
 //TODO Route pour supprimer un Diary (Delete)
 
 router.delete("/", async (req, res) => {
+  const diaryId = req.query._id;
+  if (!diaryId) {
+    return res.status(400).json({ error: "ID de journal invalide" });
+  }
   try {
-    const diaryId = req.query._id;
-    if (!diaryId) {
-      return res.status(400).json({ error: "ID de journal invalide" });
-    }
-
     // Supprimez le journal en utilisant son ID
     const diaryToDelete = await Diary.findByIdAndDelete(diaryId);
     console.log("Carnet Supprimé :", diaryToDelete);

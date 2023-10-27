@@ -67,7 +67,7 @@ router.post("/newTravel", async (req, res) => {
         newTrip.coverImage = resultToUpload;
       }
       // console.log(user.id);
-      // console.log(result);
+
       const savedTrip = await newTrip.save();
       user.travels.push(savedTrip._id);
       await user.save();
@@ -184,14 +184,14 @@ router.put("/update", async (req, res) => {
 // TODO DELETE
 router.delete("/deleteTrip", async (req, res) => {
   const travelId = req.query._id;
+  if (!travelId) {
+    return res.status(400).json({
+      result: false,
+      error: "You must provide the _id of the travel to delete.",
+    });
+  }
   // console.log(req.body);
   try {
-    if (!travelId) {
-      return res.status(400).json({
-        result: false,
-        error: "You must provide the _id of the travel to delete.",
-      });
-    }
     const deletedDestination = await Travel.findByIdAndDelete(travelId);
     // console.log(deletedDestination);
     if (!deletedDestination) {
@@ -207,8 +207,9 @@ router.delete("/deleteTrip", async (req, res) => {
       message: "Vous avez bien supprimé le voyage",
     });
   } catch (error) {
-    console.error({ error: error.message });
+    console.error(error.message);
     res.status(500).json({ result: false, error: "An error occurred" });
   }
 });
+
 module.exports = router;
