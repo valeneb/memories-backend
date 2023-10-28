@@ -47,9 +47,9 @@ router.post("/newTravel", async (req, res) => {
       //     .status(400)
       //     .json({ result: false, message: "No file uploaded" });
       // }
-      if (req.files || res.files?.image) {
+      if (req.files || req.files?.coverImage) {
         const resultToUpload = await cloudinary.uploader.upload(
-          convertToBase64(req.files.image),
+          convertToBase64(req.files.coverImage),
           {
             folder: `memories/travelsCover/${newTrip._id}`,
             public_id: "coverImage",
