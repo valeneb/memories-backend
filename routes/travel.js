@@ -3,24 +3,24 @@ const router = express.Router();
 const User = require("../models/users");
 const Travel = require("../models/travels");
 const cloudinary = require("cloudinary").v2;
-const convertToBase64 = require("../utils/convertToBase64");
-
+// const convertToBase64 = require("../utils/convertToBase64");
+const isAuthenticated = require("../middleware/isAuthenticated");
 // TODO CREATE NEWTRAVEL POST
-router.post("/newTravel", async (req, res) => {
+router.post("/newTravel", isAuthenticated, async (req, res) => {
   // console.log(req.body);
   try {
-    const user = await User.findOne({
-      token: req.body.token,
-    });
+    // const user = await User.findOne({
+    //   token: req.body.token,
+    // });
     // console.log(user._id);
-    if (!user) {
-      res.status(401).json({
-        result: false,
-        error: "You have to be registered before creating a new programmation",
-      });
-      return;
-    }
-    if (user._id) {
+    // if (!user) {
+    //   res.status(401).json({
+    //     result: false,
+    //     error: "You have to be registered before creating a new programmation",
+    //   });
+    //   return;
+    // }
+    if (req.user) {
       // Convertir les dates du format "DD/MM/YYYY" en format JavaScript valide "YYYY-MM-DD"
       const departureDateParts = req.body.departure.split("/");
       const returnDateParts = req.body.return.split("/");
@@ -37,7 +37,7 @@ router.post("/newTravel", async (req, res) => {
           type: "Point",
           coordinates: [latitude, longitude],
         },
-        user: user._id,
+        user: req.user._id,
       });
       // coverImage
 
@@ -60,8 +60,10 @@ router.post("/newTravel", async (req, res) => {
         newTrip.coverImage = resultToUpload;
       }
       // console.log(user.id);
-
+      // console.log(req.files.coverImage);
       const savedTrip = await newTrip.save();
+      const user = await User.findOne({ firstname: req.body.firstname });
+      // console.log(user);
       user.travels.push(savedTrip._id);
       await user.save();
       // console.log(savedTrip._id.toString());
