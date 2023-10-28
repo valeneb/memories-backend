@@ -2,12 +2,17 @@ const mongoose = require("mongoose");
 
 const flightSchema = new mongoose.Schema({
   airline: String,
-  flightNumber: String,
+  flightNumber: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   departureAirport: String,
   arrivalAirport: String,
   departureDate: Date,
   departureTime: Date,
   arrivalTime: Date,
+  returnDate: Date,
 
   comments: String,
   price: Number,

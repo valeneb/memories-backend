@@ -14,6 +14,7 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/user");
 const travelRouter = require("./routes/travel");
 const diaryRouter = require("./routes/diary");
+const flightRouter = require("./routes/plannings/flights");
 // const authRoute = require("./routes/auth");
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -42,5 +43,6 @@ app.use("/", indexRouter);
 app.use("/user", usersRouter);
 app.use("/travel", travelRouter);
 app.use("/diary", diaryRouter);
+app.use("/flight", flightRouter);
 
 module.exports = app;

@@ -190,10 +190,18 @@ router.delete("/deleteTrip", async (req, res) => {
     if (!deletedDestination) {
       res.status(402).json({ result: false, message: "place not found" });
     }
-    await cloudinary.api.delete_resources_by_prefix(
-      `memories/travelsCover/${travelId}`
-    );
-    await cloudinary.api.delete_folder(`memories/travelsCover/${travelId}`);
+
+    if (deletedDestination.coverImage) {
+      await cloudinary.api.delete_resources_by_prefix(
+        `memories/travelsCover/${travelId}`
+      );
+      await cloudinary.api.delete_folder(`memories/travelsCover/${travelId}`);
+      // res.status(200).json({
+      //   result: true,
+      //   travel: deletedDestination,
+      //   message: "Vous avez bien supprimé le voyage",
+      // });
+    }
     res.status(200).json({
       result: true,
       travel: deletedDestination,
