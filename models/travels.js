@@ -65,10 +65,10 @@ const travelSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   travelPlanning: [
     {
-      flights: [flightSchema],
-      carRental: [carSchema],
-      accomodations: [accomodationSchema],
-      others: [otherSchema],
+      flights: [{ flightSchema }],
+      carRental: [{ carSchema }],
+      accomodations: [{ accomodationSchema }],
+      others: [{ otherSchema }],
     },
   ],
 });
