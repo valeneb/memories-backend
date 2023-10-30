@@ -246,7 +246,7 @@ router.put("/", async (req, res) => {
     if (req.files?.picture) {
       // console.log(req.files);
       console.log(diaryToModify.moment);
-      await cloudinary.uploader.destroy(diaryToModify.moment.public_id);
+      // await cloudinary.uploader.destroy(diaryToModify.moment.public_id);
 
       const resultUploadedMoment = await cloudinary.uploader.upload(
         convertToBase64(req.files.picture),
@@ -258,7 +258,32 @@ router.put("/", async (req, res) => {
       diaryToModify.moment = resultUploadedMoment;
       diaryToModify.moment_pictures[0] = resultUploadedMoment;
       // console.log(resultUploadedMoment);
+    } else {
+      for (let i = 0; i < req.files.picture.length; i++) {
+        const picture = req.files.picture[i];
+
+        if (picture.mimetype.slice(0, 5) !== "image") {
+          return res.status(400).json({
+            message:
+              "You must send images in a good format (jpeg/jpg/png, etc.).",
+          });
+        }
+
+        const resultToUpload = await cloudinary.uploader.upload(
+          convertToBase64(picture),
+          {
+            folder: `memories/diary_images/${newDiary._id}`,
+          }
+        );
+
+        newDiary.moment_pictures.push(resultToUpload);
+      }
     }
+
+    // const savedDiary = await newDiary.save();
+
+    findTravel.travelDiary.push(savedDiary._id);
+    await findTravel.save();
     const savedAndUpdatedDiary = await diaryToModify.save();
     res.status(201).json({ result: true, diary: savedAndUpdatedDiary });
   } catch (error) {

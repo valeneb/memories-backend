@@ -6,6 +6,7 @@ const flightSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    sparse: true,
   },
   departureAirport: String,
   arrivalAirport: String,
@@ -13,7 +14,7 @@ const flightSchema = new mongoose.Schema({
   departureTime: Date,
   arrivalTime: Date,
   returnDate: Date,
-
+  arrivalDate: Date,
   comments: String,
   price: Number,
 });
@@ -63,14 +64,12 @@ const travelSchema = new mongoose.Schema({
   coverImage: { type: mongoose.Schema.Types.Mixed, default: {} },
   travelDiary: [{ type: mongoose.Schema.Types.ObjectId, ref: "Diary" }],
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  travelPlanning: [
-    {
-      flights: [{ flightSchema }],
-      carRental: [{ carSchema }],
-      accomodations: [{ accomodationSchema }],
-      others: [{ otherSchema }],
-    },
-  ],
+  travelPlanning: {
+    flights: [flightSchema],
+    carRental: [carSchema],
+    accomodations: [accomodationSchema],
+    others: [otherSchema],
+  },
 });
 
 // travelSchema.index({ location: "2dsphere" });
