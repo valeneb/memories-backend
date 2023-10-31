@@ -31,9 +31,15 @@ router.post("/newFlight", async (req, res) => {
         comments,
         price,
       } = req.body;
-      const departureDateParts = req.body.departureDate.split("/");
-      const returnDateParts = req.body.returnDate.split("/");
-      const arrivalDateParts = req.body.arrivalDate.split("/");
+      const departureDateParts = req.body.departureDate
+        ? req.body.departureDate.split("/")
+        : [];
+      const returnDateParts = req.body.returnDate
+        ? req.body.returnDate.split("/")
+        : [];
+      const arrivalDateParts = req.body.arrivalDate
+        ? req.body.arrivalDate.split("/")
+        : [];
       const formattedDepartureDate = `${departureDateParts[2]}-${departureDateParts[1]}-${departureDateParts[0]}`;
       const formattedArrivalDate = `${arrivalDateParts[2]}-${arrivalDateParts[1]}-${arrivalDateParts[0]}`;
       const formattedReturnDate = `${returnDateParts[2]}-${returnDateParts[1]}-${returnDateParts[0]}`;
@@ -41,17 +47,17 @@ router.post("/newFlight", async (req, res) => {
       const arrivalTime = new Date(`1970-01-01T${req.body.arrivalTime}`);
 
       const newFlight = {
-        airline,
-        departureAirport,
-        arrivalAirport,
-        flightNumber,
+        airline: airline || "",
+        departureAirport: departureAirport || "",
+        arrivalAirport: arrivalAirport || "",
+        flightNumber: flightNumber || 0,
         departureDate: formattedDepartureDate,
         returnDate: formattedReturnDate,
         arrivalDate: formattedArrivalDate,
-        departureTime,
-        arrivalTime,
-        comments,
-        price,
+        departureTime: departureTime || null,
+        arrivalTime: arrivalTime || null,
+        comments: comments || "",
+        price: price || 0,
       };
 
       // console.log(newFlight);
