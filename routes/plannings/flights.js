@@ -199,11 +199,10 @@ router.put("/updateFlight", async (req, res) => {
       //   { $set: flight },
       //   { new: true }
       // );
-      const victoire = await travel.travelPlanning.flights
-        .id(flightId)
-        .set(flight);
+      // const victoire =
+      await travel.travelPlanning.flights.id(flightId).set(flight);
 
-      console.log(victoire);
+      // console.log(victoire);
       const updatedTravel = await travel.save();
       res.status(200).json({ result: true, flight: updatedTravel });
     }
@@ -227,7 +226,7 @@ router.delete("/deleteFlights", async (req, res) => {
         error: "Travel not found",
       });
     }
-    if (flightId) {
+    if (!flightId) {
       return res.status(404).json({
         result: false,
         error: "Flight not found in this travel",
@@ -236,7 +235,7 @@ router.delete("/deleteFlights", async (req, res) => {
 
     // If flightId is provided, delete only that specific flight
     if (flightId) {
-      const flightTodelete = await Travel.deleteOne({
+      const flightTodelete = await Travel.findOneAndUpdate({
         flightId: flightId,
       });
       // console.log(flightTodelete);
