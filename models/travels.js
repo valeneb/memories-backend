@@ -19,14 +19,38 @@ const flightSchema = new mongoose.Schema({
   price: Number,
 });
 const carSchema = new mongoose.Schema({
-  carBrand: String,
-  carModel: String,
-  licensePlate: String,
-  rentalCompany: String,
-  rentalStart: Date,
-  rentalEnd: Date,
-  comments: String,
-  price: Number,
+  carBrand: {
+    default: "",
+    type: String,
+  },
+  carModel: {
+    default: false,
+    type: String,
+  },
+  licensePlate: {
+    default: "",
+    type: String,
+  },
+  rentalCompany: {
+    default: "",
+    type: String,
+  },
+  rentalStart: {
+    default: null,
+    type: Date,
+  },
+  rentalEnd: {
+    default: null,
+    type: Date,
+  },
+  comments: {
+    default: "",
+    type: String,
+  },
+  price: {
+    default: 0,
+    type: Number,
+  },
 });
 const accomodationSchema = new mongoose.Schema({
   hotelName: String,

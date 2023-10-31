@@ -5,6 +5,8 @@ const Travel = require("../models/travels");
 const cloudinary = require("cloudinary").v2;
 const convertToBase64 = require("../utils/convertToBase64");
 const isAuthenticated = require("../middleware/isAuthenticated");
+
+// const ObjectId = require("mongoose").Types.ObjectId;
 // TODO CREATE NEWTRAVEL POST
 // router.post("/newTravel", isAuthenticated, async (req, res) => {
 //   // console.log(req.body);
@@ -122,7 +124,7 @@ router.post("/newTravel", isAuthenticated, async (req, res) => {
 
 // TODO GET but POST because the front doesn't want to accept to GET method by req.body TO GET ALL TRAVELS
 router.get("/", async (req, res) => {
-  console.log(req.query);
+  // console.log(req.query);
   try {
     const user = await User.findOne({ token: req.query.token });
     // console.log(user);
@@ -142,27 +144,97 @@ router.get("/", async (req, res) => {
   }
 });
 // TODO UPDATE DATE DESTINATION DATE=>BOTH
-router.put("/update", async (req, res) => {
-  // console.log(req.body);
-  try {
-    // Vérifiez si l'ID de l'objet à mettre à jour est fourni dans le corps de la requête.
-    if (!req.body._id) {
-      return res.status(400).json({
-        result: false,
-        error: "You must provide the _id of the travel to update.",
-      });
-    }
-    // console.log(req.body._id);
-    const travelToModify = await Travel.findById(req.body._id);
-    //? à voir si il faut formater la date par la suite mais tout fonctionne
-    //!voir pour la gestion géospatiale si géré en front sinon peut avec mongoDB pour mpodifier une ville qui correspond à ses coordonnées géomètriquesmais complexe
+// router.put("/update", async (req, res) => {
+//   const travelId = req.query._id;
+//   console.log(travelId);
+//   if (!travelId) {
+//     return res.status(400).json({
+//       result: false,
+//       error: "You must provide the _id of the travel to update.",
+//     });
+//   }
+//   try {
+//     const travelToModify = await Travel.findById(travelId);
 
-    //Créez un objet contenant les champs à mettre à jour.
-    // const updateFields = {};
-    // console.log(req.body.destination);
+//     console.log(travelToModify);
+//     if (req.body.destination) {
+//       travelToModify.destination = req.body.destination;
+//       console.log(travelToModify.destination);
+//     }
+//     if (req.body.departure) {
+//       travelToModify.departure = req.body.departure;
+//     }
+//     if (req.body.return) {
+//       travelToModify.return = req.body.return;
+//     }
+//     if (req.body.latitude) {
+//       travelToModify.location.coordinates[0].latitude = req.body.latitude;
+//       console.log(travelToModify.location.coordinates[0].latitude);
+//     }
+//     if (req.body.longitude) {
+//       travelToModify.location.coordinates[1].longitude = req.body.longitude;
+//       console.log(travelToModify.location.coordinates[1].longitude);
+//     }
+//     if (req.files?.image) {
+//       if (!travelToModify.coverImage) {
+//         travelToModify.coverImage = {};
+//       }
+//       console.log(req.files);
+
+//       if (travelToModify.coverImage.public_id) {
+//         //!si ce console.log apparaît id undefined controle de la route post et le folder d'nvoie cloudinary à revoir
+//         // console.log(travelToModify.coverImage.public_id);
+//         await cloudinary.uploader.destroy(travelToModify.coverImage.public_id);
+//       }
+
+//       const uploadedCoverImage = await cloudinary.uploader.upload(
+//         convertToBase64(req.files.image),
+//         {
+//           folder: `memories/travelsCover/${travelToModify._id}`,
+//           public_id: "coverImage",
+//         }
+//       );
+//       // console.log(uploadedCoverImage);
+//       travelToModify.coverImage = uploadedCoverImage;
+//     }
+//     // console.log(travelToModify);
+//     // Effectuez la mise à jour en utilisant findOneAndUpdate.
+//     const updatedTravel = await Travel.findByIdAndUpdate(
+//       travelId,
+//       { $push: travelToModify },
+//       { new: true } // Pour obtenir le document mis à jour
+//     );
+
+//     if (!updatedTravel) {
+//       return res.status(404).json({
+//         result: false,
+//         error: "Travel not found",
+//       });
+//     }
+
+//     // console.log(res.result.nModified + " document(s) updated");
+//     res.status(200).json({ result: true, trip: updatedTravel });
+//   } catch (error) {
+//     console.error({ error: error.message });
+//     res.status(500).json({ result: false, error: "An error occurred" });
+//   }
+// });
+router.put("/update", async (req, res) => {
+  const travelId = req.query._id;
+  // console.log(travelId);
+  if (!travelId) {
+    return res.status(400).json({
+      result: false,
+      error: "You must provide the _id of the travel to update.",
+    });
+  }
+  try {
+    const travelToModify = await Travel.findOne({ _id: travelId });
+
+    // console.log(travelToModify);
     if (req.body.destination) {
       travelToModify.destination = req.body.destination;
-      // console.log(updateFields.destination);
+      // console.log(travelToModify.destination);
     }
     if (req.body.departure) {
       travelToModify.departure = req.body.departure;
@@ -171,10 +243,12 @@ router.put("/update", async (req, res) => {
       travelToModify.return = req.body.return;
     }
     if (req.body.latitude) {
-      travelToModify.latitude = req.body.latitude;
+      travelToModify.location.coordinates[0] = req.body.latitude;
+      // console.log(travelToModify.location.coordinates[0]);
     }
     if (req.body.longitude) {
-      travelToModify.longitude = req.body.longitude;
+      travelToModify.location.coordinates[1] = req.body.longitude;
+      // console.log(travelToModify.location.coordinates[1]);
     }
     if (req.files?.image) {
       if (!travelToModify.coverImage) {
@@ -200,8 +274,8 @@ router.put("/update", async (req, res) => {
     }
     // console.log(travelToModify);
     // Effectuez la mise à jour en utilisant findOneAndUpdate.
-    const updatedTravel = await Travel.findOneAndUpdate(
-      { _id: req.body._id },
+    const updatedTravel = await Travel.findByIdAndUpdate(
+      { _id: travelId },
       { $set: travelToModify },
       { new: true } // Pour obtenir le document mis à jour
     );
@@ -220,40 +294,52 @@ router.put("/update", async (req, res) => {
     res.status(500).json({ result: false, error: "An error occurred" });
   }
 });
-
 // TODO DELETE
 router.delete("/deleteTrip", async (req, res) => {
-  const travelId = req.query._id;
+  const travelId = req.query.travelId;
+  const userId = req.query.userId;
   if (!travelId) {
     return res.status(400).json({
       result: false,
       error: "You must provide the _id of the travel to delete.",
     });
   }
-  // console.log(req.body);
+  const userFound = await User.findById(userId);
+  // console.log(user);
+  if (!userFound) {
+    res.status(404).json({ result: false, error: "user not found" });
+  }
   try {
-    const deletedDestination = await Travel.findByIdAndDelete(travelId);
-    // console.log(deletedDestination);
-    if (!deletedDestination) {
-      res.status(402).json({ result: false, message: "place not found" });
-    }
+    if (travelId && userFound) {
+      const deletedDestination = await Travel.findByIdAndDelete(travelId);
+      const user = await User.findByIdAndUpdate(userId, {
+        $pull: { travels: travelId },
+      });
+      console.log(user);
+      // console.log(deletedDestination);
+      if (!deletedDestination) {
+        res.status(402).json({ result: false, message: "place not found" });
+      }
 
-    if (deletedDestination.coverImage) {
-      await cloudinary.api.delete_resources_by_prefix(
-        `memories/travelsCover/${travelId}`
-      );
-      await cloudinary.api.delete_folder(`memories/travelsCover/${travelId}`);
-      // res.status(200).json({
-      //   result: true,
-      //   travel: deletedDestination,
-      //   message: "Vous avez bien supprimé le voyage",
-      // });
+      if (deletedDestination.coverImage === "true") {
+        await cloudinary.api.delete_resources_by_prefix(
+          `memories/travelsCover/${travelId}`
+        );
+        await cloudinary.api.delete_folder(`memories/travelsCover/${travelId}`);
+        // res.status(200).json({
+        //   result: true,
+        //   travel: deletedDestination,
+        //   message: "Vous avez bien supprimé le voyage",
+        // });
+      }
+      const userUpdate = await user.save();
+      console.log(userUpdate);
+      res.status(200).json({
+        result: true,
+        travel: deletedDestination,
+        message: "Vous avez bien supprimé le voyage",
+      });
     }
-    res.status(200).json({
-      result: true,
-      travel: deletedDestination,
-      message: "Vous avez bien supprimé le voyage",
-    });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ result: false, error: "An error occurred" });

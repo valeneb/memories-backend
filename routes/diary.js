@@ -92,9 +92,29 @@ router.put("/update", async (req, res) => {
     if (req.files?.picture) {
       // console.log(req.files);
       // console.log(diaryToModify.moment);
-      for (let i = 0; i < req.files.picture.length; i++) {
-        const picture = req.files.picture[i];
-        console.log(picture);
+      if (Array.isArray(req.files.picture)) {
+        for (let i = 0; i < req.files.picture.length; i++) {
+          const picture = req.files.picture[i];
+          //console.log(picture);
+          if (picture.mimetype.slice(0, 5) !== "image") {
+            return res.status(400).json({
+              message:
+                "You must send images in a good format (jpeg/jpg/png, etc.).",
+            });
+          }
+          const resultToUpload = await cloudinary.uploader.upload(
+            convertToBase64(picture),
+            {
+              folder: `memories/diary_images/${diaryToModify._id}`,
+            }
+          );
+          diaryToModify.moment_pictures.push(resultToUpload);
+          // console.log(diaryToModify.moment_pictures);
+          // console.log(resultToUpload);
+        }
+      } else {
+        const picture = req.files.picture;
+
         if (picture.mimetype.slice(0, 5) !== "image") {
           return res.status(400).json({
             message:
@@ -108,8 +128,6 @@ router.put("/update", async (req, res) => {
           }
         );
         diaryToModify.moment_pictures.push(resultToUpload);
-        // console.log(diaryToModify.moment_pictures);
-        // console.log(resultToUpload);
       }
     }
     const savedAndUpdatedDiary = await diaryToModify.save();
@@ -120,6 +138,7 @@ router.put("/update", async (req, res) => {
   }
 });
 //TODO 653aa5dba47d6cdeebfa10ea/
+
 //TODO Route pour supprimer un Diary (Delete)
 
 router.delete("/", async (req, res) => {
@@ -129,56 +148,36 @@ router.delete("/", async (req, res) => {
   if (!diaryId) {
     return res.status(400).json({ error: "ID de journal invalide" });
   }
-  // console.log(diaryId);
   const travel = await Travel.findById(travelId);
-  // console.log(req.query._id);
-  // console.log(travel);
-
+  console.log(travel);
   if (!travel) {
     return res.status(404).json({
       result: false,
       error: "Travel not found",
     });
   }
-  if (!diaryId) {
-    return res.status(404).json({
-      result: false,
-      error: "diary not found in this travel",
-    });
-  }
+
   try {
     if (diaryId) {
-      const diaryIdToTravel = travel.travelDiary.filter(
-        (diaryItem) => diaryId === diaryItem._id
-      );
-      const diaryTodelete = await Travel.findOneAndUpdate(diaryId, {
-        $push: { diaryId: diaryIdToTravel },
+      const diaryToDelete = await Diary.findByIdAndDelete(diaryId);
+      const travel = await Travel.findByIdAndUpdate(travelId, {
+        $pull: { travelDiary: diaryId },
       });
-      console.log(diaryTodelete);
-      console.log(diaryToTravel);
-      // console.log(travel.travelDiary);
+      console.log("Carnet Supprimé :", diaryToDelete);
+      if (!diaryToDelete) {
+        return res.status(404).json({ error: "Journal non trouvé" });
+      }
 
-      // await Travel.findOneAndDelete(diaryIdToTravel[0]);
+      // Supprimez les ressources Cloudinary associées si nécessaire
+      if (diaryToDelete.moment_pictures === "true") {
+        await cloudinary.api.delete_resources_by_prefix(
+          `memories/diary_images/${diaryId}`
+        );
+        await cloudinary.api.delete_folder(`memories/diary_images/${diaryId}`);
+      }
+
       await travel.save();
-      // diaryIdToTravel[0].delete();
 
-      // Supprimez le journal en utilisant son ID
-      // const diaryToDelete = await Diary.findByIdAndDelete(diaryId);
-      // console.log("Carnet Supprimé :", diaryToDelete);
-      // if (!diaryToDelete) {
-      //   return res.status(404).json({ error: "Journal non trouvé" });
-      // }
-      // console.log(diaryToDelete.travelDiary._id);
-      // // Supprimez les ressources Cloudinary associées si nécessaire
-      // await cloudinary.api.delete_resources_by_prefix(
-      //   `memories/diary_images/${diaryId}`
-      // );
-      // await cloudinary.api.delete_folder(`memories/diary_images/${diaryId}`);
-      //   (diaryItem) => {
-      //   diaryId.toString() === diaryItem._id.toString();
-      //   console.log(diaryItem);
-      // });
-      // console.log(travel);
       res.status(200).json({
         result: true,
         diary: diaryToDelete,
@@ -192,6 +191,19 @@ router.delete("/", async (req, res) => {
 });
 
 module.exports = router;
+// Supprimez le journal en utilisant son ID
+
+//   (diaryItem) => {
+//   diaryId.toString() === diaryItem._id.toString();
+//   console.log(diaryItem);
+// });
+// const diaryIdToTravel = travel.travelDiary.find(
+//   (diaryItem) => diaryId === diaryItem._id
+// );
+// diaryIdToTravel[0].remove();
+// diaryIdToTravel[0].delete();
+
+// console.log(travel);
 /* if (req.files?.picture) {
   if (!Array.isArray(req.files.picture)) {
     const picture = req.files.picture;
@@ -258,3 +270,12 @@ module.exports = router;
 //   // const savedDiary = await newDiary.save();
 //   findTravel.travelDiary.push(savedDiary._id);
 //   await findTravel.save();
+// console.log(diaryIdToDelete);
+// for (let i = 0; i < travel.travelDiary.length; i++) {
+//   if (travel.travelDiary[i].toString() === diaryId.toString()) {
+//     console.log(travel.travelDiary[i]);
+//   }
+// }
+// console.log(travel.travelDiary);
+
+// await Travel.findOneAndDelete(diaryIdToTravel[0]);

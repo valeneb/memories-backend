@@ -5,7 +5,8 @@ const SHA256 = require("crypto-js/sha256");
 const encBase64 = require("crypto-js/enc-base64");
 const cloudinary = require("cloudinary").v2;
 const convertToBase64 = require("../utils/convertToBase64");
-
+const Diary = require("../models/diaries");
+const Travel = require("../models/travels");
 const User = require("../models/users");
 
 router.post("/signup", async (req, res) => {
@@ -119,17 +120,52 @@ router.post("/login", async (req, res) => {
 });
 
 // TODO DELETE USER
+// router.delete("/deleteUser", async (req, res) => {
+//   console.log(req.query);
+//   try {
+//     if (!req.query.token) {
+//       res.status(401).json({ result: false, message: "user not found" });
+//       return;
+//     }
+//     const user = await User.findOne({ token: req.query.token });
+//     const userToDelete = await User.deleteOne({ token: req.query.token });
+//     // console.log(userToDelete);
+//     console.log(user);
+//     if (userToDelete.deletedCount > 0) {
+//       await Travel.deleteMany({ user: userToDelete._id });
+//       console.log(userToDelete);
+//       const deletedTravelsIds = user.travels.foreach((travel) => {
+//         travel._id;
+//       });
+
+//       await Diary.deleteMany({ travel: { $in: deletedTravelsIds } });
+//       res.status(201).json({ reslut: true, user: userToDelete });
+//     }
+//   } catch (error) {
+//     console.error({ error: error.message });
+//     res.status(500).json({ result: false, error: "An error occurred" });
+//   }
+// });
 router.delete("/deleteUser", async (req, res) => {
-  console.log(req.body);
+  console.log(req.query);
   try {
-    if (!req.body.token) {
+    if (!req.query.token) {
       res.status(401).json({ result: false, message: "user not found" });
       return;
     }
-    const userToDelete = await User.deleteOne({ token: req.body.token });
-    // console.log(userToDelete);
-    if (userToDelete.deletedCount > 0) {
-      res.status(204).json({ reslut: true, user: userToDelete });
+    const userToDelete = await User.findOneAndDelete({
+      token: req.query.token,
+    });
+    if (userToDelete) {
+      // Supprimer les voyages associés à l'utilisateur
+      await Travel.deleteMany({ user: userToDelete._id });
+
+      // Supprimer les journaux associés aux voyages supprimés
+      await Diary.deleteMany({ travel: { $in: userToDelete.travels } });
+
+      res.status(201).json({ result: true, user: userToDelete });
+    } else {
+      res.status(404).json({ result: false, message: "User not found" });
     }
   } catch (error) {
     console.error({ error: error.message });
