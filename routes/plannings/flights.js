@@ -38,7 +38,7 @@ router.post("/newFlight", async (req, res) => {
       !Array.isArray(travel.travelPlanning) ||
       travel.travelPlanning.length === 0
     ) {
-      travel.travelPlanning = [{ flights: [] }];
+      travel.travelPlanning.flights = [];
     }
 
     const {
@@ -73,6 +73,7 @@ router.post("/newFlight", async (req, res) => {
     const flightBooking = await Travel.findByIdAndUpdate(req.query._id, {
       $push: { "travelPlanning.flights": newFlight },
     });
+
     const newFlightWithId =
       flightBooking.travelPlanning.flights[
         flightBooking.travelPlanning.flights.length - 1

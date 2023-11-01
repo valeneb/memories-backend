@@ -25,7 +25,7 @@ router.post("/newAccomodation", async (req, res) => {
     !Array.isArray(travel.travelPlanning) ||
     travel.travelPlanning.length === 0
   ) {
-    travel.travelPlanning = [{ accomodations: [] }];
+    travel.travelPlanning.accommodations = [];
   }
   try {
     //? hotelName, address, checkinDate, checkOutDate, roomNumber,comments,price
@@ -55,8 +55,8 @@ router.post("/newAccomodation", async (req, res) => {
       ];
     res.status(200).json({
       result: true,
-      travel: newAccommodationWithId,
-      travelIdOfaccommodationReservation,
+      accommodation: newAccommodationWithId,
+      //   travelIdOfaccommodationReservation,
     });
   } catch (error) {
     console.error(error.message);
@@ -175,7 +175,7 @@ router.delete("/deleteAccommodation", async (req, res) => {
       { $pull: { "travelPlanning.accommodations": { _id: accommodationId } } },
       { new: true }
     ).select("travelPlanning.accommodations");
-
+    // projection: { "travelPlanning.accommodations.$": 1 }
     if (
       !deletedAccommodation ||
       deletedAccommodation.travelPlanning.accommodations.length === 0
@@ -186,7 +186,7 @@ router.delete("/deleteAccommodation", async (req, res) => {
       });
     }
     const deletedSubdocument =
-      deletedAccommodation.travelPlanning.accommodations[0];
+      deletedAccommodation.travelPlanning.accommodations;
     // accommodationToDelete
     res.status(200).json({ result: true, accommodation: deletedSubdocument });
   } catch (error) {
