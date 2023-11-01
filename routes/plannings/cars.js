@@ -1,6 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const Travel = require("../../models/travels");
+
+function getDefault(value, defaultValue = "") {
+  return value ? value : defaultValue;
+}
+
+function formatDate(date) {
+  if (date) {
+    const dateParts = date.split("/");
+    return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+  }
+  return null;
+}
 router.post("/newCar", async (req, res) => {
   try {
     // const travelId = req.query.travelId;
@@ -17,7 +29,7 @@ router.post("/newCar", async (req, res) => {
       !Array.isArray(travel.travelPlanning) ||
       travel.travelPlanning.length === 0
     ) {
-      travel.travelPlanning.carRentals = [];
+      travel.travelPlanning = { carRentals: [] };
     }
     if (travel._id) {
       const {
@@ -29,30 +41,28 @@ router.post("/newCar", async (req, res) => {
         price,
       } = req.body;
 
-      const rentalStartDateParts = req.body.rentalStart
-        ? req.body.rentalStart.split("/")
-        : [];
-      const rentalEndDateParts = req.body.rentalEnd
-        ? req.body.rentalEnd.split("/")
-        : [];
-      const formattedStartDate = `${rentalStartDateParts[2]}-${rentalStartDateParts[1]}-${rentalStartDateParts[0]}`;
-      const formattedEndDate = `${rentalEndDateParts[2]}-${rentalEndDateParts[1]}-${rentalEndDateParts[0]}`;
+      const formattedStartDate = formatDate(req.body.rentalStart);
+      const formattedEndDate = formatDate(req.body.rentalEnd);
       const newCar = {
-        carBrand: carBrand || "",
-        carModel: carModel || "",
-        licensePlate: licensePlate || "",
-        rentalCompany: rentalCompany || "",
-        comments: comments || "",
-        price: price || 0,
+        carBrand: getDefault(carBrand),
+        carModel: getDefault(carModel),
+        licensePlate: getDefault(licensePlate),
+        rentalCompany: getDefault(rentalCompany),
+        comments: getDefault(comments),
+        price: getDefault(price, 0),
         rentalStart: formattedStartDate,
         rentalEnd: formattedEndDate,
       };
       // console.log(newCar);
       // const updateTravelCarRental =
-      const carReservation = await Travel.findByIdAndUpdate(req.query._id, {
-        $push: { "travelPlanning.carRentals": newCar },
-      });
-      await travel.save();
+      const carReservation = await Travel.findByIdAndUpdate(
+        req.query._id,
+        {
+          $push: { "travelPlanning.carRentals": newCar },
+        },
+        { new: true }
+      );
+      // await travel.save();
 
       //   console.log((travel.travelPlanning.carRental = [...newCar]));
 

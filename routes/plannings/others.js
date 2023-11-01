@@ -39,7 +39,7 @@ router.post("/newOther", async (req, res) => {
       !Array.isArray(travel.travelPlanning) ||
       travel.travelPlanning.length === 0
     ) {
-      travel.travelPlanning.others = [];
+      travel.travelPlanning = { others: [] };
     }
     const { title, comments, price } = req.body;
     const formattedDate = formatDate(req.body.date);
@@ -54,17 +54,23 @@ router.post("/newOther", async (req, res) => {
     };
     // console.log(newOther);
     // console.log(travelId.travelPlanning);
-    if (travel.travelPlanning.others.length >= 0) {
-      const otherBooking = await Travel.findByIdAndUpdate(travelId, {
+    // if (travel.travelPlanning.others.length >= 0) {
+    //   travel.travelPlanning.others.push(newOther);
+    //   travel.save();
+    const otherBooking = await Travel.findByIdAndUpdate(
+      travelId,
+      {
         $push: { "travelPlanning.others": newOther },
-      });
-      console.log(otherBooking);
-      const newOtherWithId =
-        otherBooking.travelPlanning.others[
-          otherBooking.travelPlanning.others.length - 1
-        ];
-      res.status(200).json({ result: true, travel: newOtherWithId });
-    }
+      },
+      { new: true }
+    );
+    console.log(otherBooking);
+    const newOtherWithId =
+      otherBooking.travelPlanning.others[
+        otherBooking.travelPlanning.others.length - 1
+      ];
+    res.status(200).json({ result: true, travel: newOtherWithId });
+    // }
   } catch (error) {
     console.error({ error: error.message });
     res.status(500).json({ result: false, error: error.message });

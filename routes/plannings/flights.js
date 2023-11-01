@@ -38,7 +38,7 @@ router.post("/newFlight", async (req, res) => {
       !Array.isArray(travel.travelPlanning) ||
       travel.travelPlanning.length === 0
     ) {
-      travel.travelPlanning.flights = [];
+      travel.travelPlanning = { flights: [] };
     }
 
     const {
@@ -70,10 +70,14 @@ router.post("/newFlight", async (req, res) => {
       price: getDefault(price, 0),
     };
 
-    const flightBooking = await Travel.findByIdAndUpdate(req.query._id, {
-      $push: { "travelPlanning.flights": newFlight },
-    });
-
+    const flightBooking = await Travel.findByIdAndUpdate(
+      req.query._id,
+      {
+        $push: { "travelPlanning.flights": newFlight },
+      },
+      { new: true }
+    );
+    // console.log(flightBooking);
     const newFlightWithId =
       flightBooking.travelPlanning.flights[
         flightBooking.travelPlanning.flights.length - 1
@@ -246,33 +250,28 @@ router.delete("/deleteFlight", async (req, res) => {
 
     // If flightId is provided, delete only that specific flight
     if (flightId) {
-      const flightTodelete = await Travel.findOneAndUpdate(
-        {
-          _id: travelId,
-        },
-        { $pull: { "travelPlanning.flights": { _id: flightId } } }
-      );
-      // console.log(flightTodelete);
-      // console.log(travel.travelPlanning.flights);
-      //  deleteOne({
-      //     flightId: flightId,
-      //   });
-      //   if (!flight) {
-      //
-      //   }
-      //   console.log(flightTodelete);
-      //   flight.remove();
-
-      //  else {
-      //   // If flightId is not provided, delete all flights of the travel
-      //   travel.travelPlanning.flights = [];
-      // }
-
+      console.log(flightId);
+      const flightToDelete = await Travel.findOneAndUpdate(
+        { _id: travelId },
+        { $pull: { "travelPlanning.flights": { _id: flightId } } },
+        { new: true }
+      ).select("travelPlanning.flights");
+      console.log(flightToDelete);
+      if (
+        !flightToDelete ||
+        flightToDelete.travelPlanning.flights.length === 0
+      ) {
+        return res.status(404).json({
+          result: false,
+          error: "Hébergement introuvable dans ce voyage",
+        });
+      }
       // Save the updated travel with flights removed
-
-      res.status(200).json({ result: true, travel: flightTodelete });
+      const deletedFlight = flightToDelete.travelPlanning.flights;
+      res.status(200).json({ result: true, flight: deletedFlight });
       // const updatedTravel =
-      await travel.save();
+      // await travel.save();
+
       // console.log(updatedTravel);
     }
   } catch (error) {
@@ -280,5 +279,8 @@ router.delete("/deleteFlight", async (req, res) => {
     res.status(500).json({ result: false, error: error.message });
   }
 });
-
+//  else {
+//   // If flightId is not provided, delete all flights of the travel
+//   travel.travelPlanning.flights = [];
+// }
 module.exports = router;

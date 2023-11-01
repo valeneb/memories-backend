@@ -10,8 +10,9 @@ const bodyParser = require("body-parser");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const fileUpload = require("express-fileupload");
-var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/user");
+
+var planningRouter = require("./routes/plannings/allPlannings");
 const travelRouter = require("./routes/travel");
 const diaryRouter = require("./routes/diary");
 const flightRouter = require("./routes/plannings/flights");
@@ -42,7 +43,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // Pour gérer les données 
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 require("./config/database");
-app.use("/", indexRouter);
+app.use("/", planningRouter);
 app.use("/user", usersRouter);
 app.use("/travel", travelRouter);
 app.use("/diary", diaryRouter);

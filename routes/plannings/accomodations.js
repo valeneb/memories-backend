@@ -25,7 +25,7 @@ router.post("/newAccomodation", async (req, res) => {
     !Array.isArray(travel.travelPlanning) ||
     travel.travelPlanning.length === 0
   ) {
-    travel.travelPlanning.accommodations = [];
+    travel.travelPlanning = { accommodations: [] };
   }
   try {
     //? hotelName, address, checkinDate, checkOutDate, roomNumber,comments,price
@@ -42,13 +42,17 @@ router.post("/newAccomodation", async (req, res) => {
       roomNumber: getDefault(roomNumber, 0),
       price: getDefault(price, 0),
     };
+    // if (travel.travelPlanning.accommodations.length >= 0) {
+    //   travel.travelPlanning.accommodations.push(newOther);
+    //   travel.save();
     const accommodationReservation = await Travel.findByIdAndUpdate(
       req.query._id,
       {
         $push: { "travelPlanning.accommodations": newAccommodation },
-      }
+      },
+      { new: true }
     );
-    const travelIdOfaccommodationReservation = accommodationReservation._id;
+    // const travelIdOfaccommodationReservation = accommodationReservation._id;
     const newAccommodationWithId =
       accommodationReservation.travelPlanning.accommodations[
         accommodationReservation.travelPlanning.accommodations.length - 1
@@ -58,6 +62,7 @@ router.post("/newAccomodation", async (req, res) => {
       accommodation: newAccommodationWithId,
       //   travelIdOfaccommodationReservation,
     });
+    // }
   } catch (error) {
     console.error(error.message);
     res.status(500).json({});

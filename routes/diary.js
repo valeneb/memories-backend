@@ -72,13 +72,14 @@ router.get("/", async (req, res) => {
 //TODO Route pour mettre à jour un Diary (Update)
 router.put("/update", async (req, res) => {
   // console.log(req.body);
-  if (!req.query._id) {
+  const diaryId = req.query.diaryId;
+  if (!diaryId) {
     return res.status(401).json({
       result: false,
       error: "diary file doesn't exist start to create something",
     });
   }
-  const diaryToModify = await Diary.findById(req.query._id);
+  const diaryToModify = await Diary.findById(diaryId);
   // console.log(diaryToModify);
   try {
     if (req.body.title) {
@@ -108,7 +109,7 @@ router.put("/update", async (req, res) => {
               folder: `memories/diary_images/${diaryToModify._id}`,
             }
           );
-          diaryToModify.moment_pictures.push(resultToUpload);
+          diaryToModify.moment_pictures.push(resultToUpload.secure_url);
           // console.log(diaryToModify.moment_pictures);
           // console.log(resultToUpload);
         }
@@ -127,7 +128,7 @@ router.put("/update", async (req, res) => {
             folder: `memories/diary_images/${diaryToModify._id}`,
           }
         );
-        diaryToModify.moment_pictures.push(resultToUpload);
+        diaryToModify.moment_pictures.push(resultToUpload.secure_url);
       }
     }
     const savedAndUpdatedDiary = await diaryToModify.save();

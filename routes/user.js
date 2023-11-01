@@ -120,32 +120,7 @@ router.post("/login", async (req, res) => {
 });
 
 // TODO DELETE USER
-// router.delete("/deleteUser", async (req, res) => {
-//   console.log(req.query);
-//   try {
-//     if (!req.query.token) {
-//       res.status(401).json({ result: false, message: "user not found" });
-//       return;
-//     }
-//     const user = await User.findOne({ token: req.query.token });
-//     const userToDelete = await User.deleteOne({ token: req.query.token });
-//     // console.log(userToDelete);
-//     console.log(user);
-//     if (userToDelete.deletedCount > 0) {
-//       await Travel.deleteMany({ user: userToDelete._id });
-//       console.log(userToDelete);
-//       const deletedTravelsIds = user.travels.foreach((travel) => {
-//         travel._id;
-//       });
 
-//       await Diary.deleteMany({ travel: { $in: deletedTravelsIds } });
-//       res.status(201).json({ reslut: true, user: userToDelete });
-//     }
-//   } catch (error) {
-//     console.error({ error: error.message });
-//     res.status(500).json({ result: false, error: "An error occurred" });
-//   }
-// });
 router.delete("/deleteUser", async (req, res) => {
   // console.log(req.query);
   try {
@@ -156,7 +131,25 @@ router.delete("/deleteUser", async (req, res) => {
     const userToDelete = await User.findOneAndDelete({
       token: req.query.token,
     });
+
+    if (!userToDelete) {
+      return res.status(402).json({
+        result: false,
+        message:
+          "your account is not found maybe you have to go create one new and travel",
+      });
+    }
     if (userToDelete) {
+      // console.log(userToDelete);
+      if (userToDelete.account.avatar.secure_url) {
+        await cloudinary.api.delete_resources_by_prefix(
+          `memories/users/${userToDelete._id}`
+        );
+        await cloudinary.api.delete_folder(
+          `memories/users/${userToDelete._id}`
+        );
+      }
+
       // Supprimer les voyages associés à l'utilisateur
       await Travel.deleteMany({ user: userToDelete._id });
 
@@ -164,8 +157,6 @@ router.delete("/deleteUser", async (req, res) => {
       await Diary.deleteMany({ travel: { $in: userToDelete.travels } });
 
       res.status(201).json({ result: true, user: userToDelete });
-    } else {
-      res.status(404).json({ result: false, message: "User not found" });
     }
   } catch (error) {
     console.error({ error: error.message });
@@ -184,17 +175,17 @@ router.put("/updateUser", isAuthenticated, async (req, res) => {
     if (req.body.username) {
       user.account.username = req.body.username;
     }
-    if (req.body.firsname) {
+    if (req.body.firstname) {
       user.firstname = req.body.firstname;
     }
-    if (req.body.firstname) {
-      user.firstname;
-    }
+
     if (req.body.lastname) {
       user.lastname = req.body.lastname;
     }
     // const token = uid2(64);
-
+    if (req.body.email) {
+      user.email = req.body.email;
+    }
     if (req.body.newPassword) {
       const newSalt = uid2(16);
       const newPasswordHash = SHA256(req.body.newPassword + newSalt).toString(
@@ -219,7 +210,7 @@ router.put("/updateUser", isAuthenticated, async (req, res) => {
           public_id: "avatar",
         }
       );
-      user.account.avatar = uploadedUserAccountAvatar;
+      user.account.avatar = uploadedUserAccountAvatar.secure_url;
     }
     const updatedUser = await User.findByIdAndUpdate(
       { _id: user._id },
