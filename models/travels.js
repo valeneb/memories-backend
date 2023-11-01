@@ -89,7 +89,7 @@ const carSchema = new mongoose.Schema({
     type: Number,
   },
 });
-const accomodationSchema = new mongoose.Schema({
+const accommodationSchema = new mongoose.Schema({
   hotelName: {
     default: "",
     type: String,
@@ -164,7 +164,7 @@ const travelSchema = new mongoose.Schema({
   travelPlanning: {
     flights: [flightSchema],
     carRentals: [carSchema],
-    accomodations: [accomodationSchema],
+    accommodations: [accommodationSchema],
     others: [otherSchema],
   },
 });

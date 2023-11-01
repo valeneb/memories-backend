@@ -8,7 +8,7 @@ function getDefault(value, defaultValue = "") {
 
 function formatDate(date) {
   if (date) {
-    console.log(date);
+    // console.log(date);
     const dateParts = date.split("/");
     return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
   }
@@ -87,19 +87,18 @@ router.post("/newFlight", async (req, res) => {
 // Get all flights of a specific travel
 router.get("/getFlights", async (req, res) => {
   console.log(req.query);
+  const travelId = req.query._id;
+
+  // Find the travel by ID
+  const travel = await Travel.findById(travelId);
+
+  if (!travel) {
+    return res.status(404).json({
+      result: false,
+      error: "Travel not found",
+    });
+  }
   try {
-    const travelId = req.query._id;
-
-    // Find the travel by ID
-    const travel = await Travel.findById(travelId);
-
-    if (!travel) {
-      return res.status(404).json({
-        result: false,
-        error: "Travel not found",
-      });
-    }
-
     // Retrieve all flights from the travel's flight list
     const flights = travel.travelPlanning.flights;
     // console.log(flights);
@@ -223,7 +222,7 @@ router.put("/updateFlight", async (req, res) => {
   }
 });
 // Delete all flights or a single flight of a specific travel
-router.delete("/deleteFlights", async (req, res) => {
+router.delete("/deleteFlight", async (req, res) => {
   try {
     const travelId = req.query.travelId;
     const flightId = req.query.flightId;
@@ -271,7 +270,8 @@ router.delete("/deleteFlights", async (req, res) => {
       // Save the updated travel with flights removed
 
       res.status(200).json({ result: true, travel: flightTodelete });
-      // const updatedTravel = await travel.save();
+      // const updatedTravel =
+      await travel.save();
       // console.log(updatedTravel);
     }
   } catch (error) {

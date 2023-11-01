@@ -33,7 +33,7 @@ router.post("/newAccomodation", async (req, res) => {
 
     const formattedCheckInDate = formatDate(req.body.checkInDate);
     const formattedCheckOutDate = formatDate(req.body.checkOutDate);
-    const newAccomodation = {
+    const newAccommodation = {
       hotelName: getDefault(hotelName),
       address: getDefault(address),
       checkInDate: formattedCheckInDate,
@@ -42,21 +42,21 @@ router.post("/newAccomodation", async (req, res) => {
       roomNumber: getDefault(roomNumber, 0),
       price: getDefault(price, 0),
     };
-    const accomodationReservation = await Travel.findByIdAndUpdate(
+    const accommodationReservation = await Travel.findByIdAndUpdate(
       req.query._id,
       {
-        $push: { "travelPlanning.accomodations": newAccomodation },
+        $push: { "travelPlanning.accommodations": newAccommodation },
       }
     );
-    const travelIdOfaccomodationReservation = accomodationReservation._id;
-    const newAccomodationWithId =
-      accomodationReservation.travelPlanning.accomodations[
-        accomodationReservation.travelPlanning.accomodations.length - 1
+    const travelIdOfaccommodationReservation = accommodationReservation._id;
+    const newAccommodationWithId =
+      accommodationReservation.travelPlanning.accommodations[
+        accommodationReservation.travelPlanning.accommodations.length - 1
       ];
     res.status(200).json({
       result: true,
-      travel: newAccomodationWithId,
-      travelIdOfaccomodationReservation,
+      travel: newAccommodationWithId,
+      travelIdOfaccommodationReservation,
     });
   } catch (error) {
     console.error(error.message);
@@ -75,7 +75,7 @@ router.get("/", async (req, res) => {
     });
   }
   try {
-    const accommodations = travel.travelPlanning.accomodations;
+    const accommodations = travel.travelPlanning.accommodations;
     res.status(200).json({ result: true, accommodations });
   } catch (error) {
     console.error(error.message);
@@ -83,9 +83,10 @@ router.get("/", async (req, res) => {
   }
 });
 router.put("/update", async (req, res) => {
+  //   console.log(req.query);
   try {
     const travelId = req.query.travelId;
-    const accomodationId = req.query.accomodationId;
+    const accommodationId = req.query.accommodationId;
 
     // Trouver le voyage par son ID
     const travel = await Travel.findById(travelId);
@@ -98,7 +99,8 @@ router.put("/update", async (req, res) => {
 
     // Trouver l'hébergement dans le voyage
     const accommodation =
-      travel.travelPlanning.accomodations.id(accomodationId);
+      travel.travelPlanning.accommodations.id(accommodationId);
+    // console.log()
     if (!accommodation) {
       return res.status(404).json({
         result: false,
@@ -130,19 +132,25 @@ router.put("/update", async (req, res) => {
     }
 
     // Sauvegarder les modifications du voyage
-    const updatedTravel = await travel.save();
-
-    res.status(200).json({ result: true, travel: updatedTravel });
+    // const updatedTravel =
+    await travel.save();
+    // travel: updatedTravel
+    res.status(200).json({
+      result: true,
+      accommodation: accommodation,
+      travelId: travel._id,
+    });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ result: false, error: error.message });
   }
 });
+
 router.delete("/deleteAccommodation", async (req, res) => {
   try {
     const travelId = req.query.travelId;
     const accommodationId = req.query.accommodationId;
-    console.log(accommodationId);
+
     const travel = await Travel.findById(travelId);
     if (!travel) {
       return res.status(404).json({
@@ -150,83 +158,40 @@ router.delete("/deleteAccommodation", async (req, res) => {
         error: "Travel not found",
       });
     }
+
     if (!accommodationId) {
       return res.status(404).json({
         result: false,
         error: "Hébergement introuvable dans ce voyage",
       });
     }
-    if (accommodationId) {
-      const accommodationToDelete = await Travel.findOneAndUpdate(
-        { _id: travelId },
-        { $pull: { "travelPlanning.accomodations": { _id: accommodationId } } }
-      );
-      res.status(200).json({ result: true, travel: accommodationToDelete });
+
+    // const accommodationToDelete =
+    await Travel.findById(travelId)
+      .select("travelPlanning.accommodations")
+      .lean();
+    const deletedAccommodation = await Travel.findOneAndUpdate(
+      { _id: travelId },
+      { $pull: { "travelPlanning.accommodations": { _id: accommodationId } } },
+      { new: true }
+    ).select("travelPlanning.accommodations");
+
+    if (
+      !deletedAccommodation ||
+      deletedAccommodation.travelPlanning.accommodations.length === 0
+    ) {
+      return res.status(404).json({
+        result: false,
+        error: "Hébergement introuvable dans ce voyage",
+      });
     }
+    const deletedSubdocument =
+      deletedAccommodation.travelPlanning.accommodations[0];
+    // accommodationToDelete
+    res.status(200).json({ result: true, accommodation: deletedSubdocument });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ result: false, error: error.message });
   }
 });
-module.exports = router;
-// router.put("/update", async (req, res) => {
-//   try {
-//     console.log(req.query);
-//     const travelId = req.query.travelId;
-//     const accomodationId = req.query.accomodationId;
-//     // Find the travel by ID
-//     const travel = await Travel.findById(travelId);
-//     console.log(travel);
-//     if (!travel) {
-//       return res.status(404).json({
-//         result: false,
-//         error: "Travel not found",
-//       });
-//     }
-//     const accommodation = travel.travelPlanning.accomodations.find(
-//       (accomodationItem) =>
-//         accomodationId.toString() === accomodationItem.toString()
-//     );
-//     console.log(accommodation);
-// if (!accommodation) {
-//   res.status(404).json({
-//     result: false,
-//     error: "accomodation not found in this travel",
-//   });
-// }
-// if (accommodation) {
-//   //? hotelName, address, checkinDate, checkOutDate, roomNumber,comments,price
-//   if (req.body.hotelName) {
-//     accommodation.hotelName = req.body.hotelName;
-//   }
-//   //   accommodation.hotelName = getDefault(req.body.hotelName);
-//   if (req.body.address) {
-//     accommodation.address = req.body.adress;
-//   }
-//   if (req.body.checkInDate) {
-//     accommodation.checkInDate = req.body.checkInDate;
-//   }
-//   if (req.body.checkOutDate) {
-//     accommodation.checkOutDate = req.body.checkOutDate;
-//   }
-//   if (req.body.roomNumber) {
-//     accommodation.roomNumber = req.body.roomNumber;
-//   }
-//   if (req.body.comments) {
-//     accommodation.comments = req.body.comments;
-//   }
-//   if (req.body.price) {
-//     accommodation.price = req.body.price;
-//   }
-//   await travel.travelPlanning.accomodations
-//     .id(accomodationId)
-//     .set(accommodation);
-//   const updatedTravel = await travel.save();
-//   res.status(200).json({ result: true, travel: updatedTravel });
-// }
-//   } catch (error) {
-//     console.error(error.message);
-//     res.status(500).json({ result: false, error: error.message });
-//   }
-// });
 module.exports = router;
