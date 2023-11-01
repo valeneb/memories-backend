@@ -19,25 +19,22 @@ const userSchema = mongoose.Schema({
   token: String,
   hash: String,
   salt: String,
-  isConnected: Boolean,
-  phoneNumber: Number,
-  birthDate: Date,
-  language: String,
-  avatar: Object,
 
-
+  // phoneNumber: Number,
+  // birthDate: Date,
+  // language: String,
 
   travels: [{ type: mongoose.Schema.Types.ObjectId, ref: "travel" }],
 });
 const User = mongoose.model("users", userSchema);
 module.exports = User;
-  // facebookId: String,
-  // name: String,
-  // email: String,
-  //  profilePicture: String,
-  // longLivedToken: String,
+// facebookId: String,
+// name: String,
+// email: String,
+//  profilePicture: String,
+// longLivedToken: String,
 
-  // googleId: String,
-  // token: String,
-  // name: String,
-  // profilePicture: String,
+// googleId: String,
+// token: String,
+// name: String,
+// profilePicture: String,

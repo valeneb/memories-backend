@@ -76,10 +76,7 @@ router.post("/newTravel", isAuthenticated, async (req, res) => {
   try {
     if (req.user) {
       // Convert the dates from "DD/MM/YYYY" to valid JavaScript format "YYYY-MM-DD"
-      const departureDateParts = req.body.departure.split("/");
-      const returnDateParts = req.body.return.split("/");
-      const formattedDepartureDate = `${departureDateParts[2]}-${departureDateParts[1]}-${departureDateParts[0]}`;
-      const formattedReturnDate = `${returnDateParts[2]}-${returnDateParts[1]}-${returnDateParts[0]}`;
+
       const latitude = parseFloat(req.body.latitude);
       const longitude = parseFloat(req.body.longitude);
 
@@ -237,17 +234,22 @@ router.put("/update", async (req, res) => {
       // console.log(travelToModify.destination);
     }
     if (req.body.departure) {
-      travelToModify.departure = req.body.departure;
+      const departureDateParts = req.body.departure.split("/");
+      const formattedDepartureDate = `${departureDateParts[2]}-${departureDateParts[1]}-${departureDateParts[0]}`;
+      travelToModify.departure = formattedDepartureDate;
     }
     if (req.body.return) {
-      travelToModify.return = req.body.return;
+      const returnDateParts = req.body.return.split("/");
+      const formattedReturnDate = `${returnDateParts[2]}-${returnDateParts[1]}-${returnDateParts[0]}`;
+
+      travelToModify.return = formattedReturnDate;
     }
     if (req.body.latitude) {
-      travelToModify.location.coordinates[0] = req.body.latitude;
+      travelToModify.location.coordinates[0] = parseFloat(req.body.latitude);
       // console.log(travelToModify.location.coordinates[0]);
     }
     if (req.body.longitude) {
-      travelToModify.location.coordinates[1] = req.body.longitude;
+      travelToModify.location.coordinates[1] = parseFloat(req.body.longitude);
       // console.log(travelToModify.location.coordinates[1]);
     }
     if (req.files?.image) {
@@ -307,7 +309,7 @@ router.delete("/deleteTrip", async (req, res) => {
   const userFound = await User.findById(userId);
   // console.log(user);
   if (!userFound) {
-    res.status(404).json({ result: false, error: "user not found" });
+    return res.status(404).json({ result: false, error: "user not found" });
   }
   try {
     if (travelId && userFound) {
@@ -318,7 +320,9 @@ router.delete("/deleteTrip", async (req, res) => {
       console.log(user);
       // console.log(deletedDestination);
       if (!deletedDestination) {
-        res.status(402).json({ result: false, message: "place not found" });
+        return res
+          .status(402)
+          .json({ result: false, message: "place not found" });
       }
 
       if (deletedDestination.coverImage === "true") {
@@ -334,7 +338,7 @@ router.delete("/deleteTrip", async (req, res) => {
       }
       const userUpdate = await user.save();
       console.log(userUpdate);
-      res.status(200).json({
+      return res.status(200).json({
         result: true,
         travel: deletedDestination,
         message: "Vous avez bien supprimé le voyage",
