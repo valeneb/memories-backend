@@ -47,14 +47,24 @@ router.post("/newCar", async (req, res) => {
         rentalStart: formattedStartDate,
         rentalEnd: formattedEndDate,
       };
-      console.log(newCar);
+      // console.log(newCar);
       // const updateTravelCarRental =
-      await Travel.findByIdAndUpdate(req.query._id, {
-        $push: { "travelPlanning.carRental": newCar },
+      const carReservation = await Travel.findByIdAndUpdate(req.query._id, {
+        $push: { "travelPlanning.carRentals": newCar },
       });
       await travel.save();
+
       //   console.log((travel.travelPlanning.carRental = [...newCar]));
-      res.status(200).json({ result: true, travel: newCar });
+
+      const newCarWithId =
+        carReservation.travelPlanning.carRentals[
+          carReservation.travelPlanning.carRentals.length - 1
+        ];
+      res.status(200).json({ result: true, travel: newCarWithId });
+      //   const findDocumentWithId = await travel.travelPlanning.carRental.findOne({
+      //     _id: newCar._id,
+      //   });
+      //   res.status(201).json({ result: found, travel: findDocumentWithId });
     }
     // TODO JUST SEND TO THE FRONT ELEMENT CREATED
   } catch (error) {

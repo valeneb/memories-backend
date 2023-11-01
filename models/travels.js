@@ -163,7 +163,7 @@ const travelSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   travelPlanning: {
     flights: [flightSchema],
-    carRental: [carSchema],
+    carRentals: [carSchema],
     accomodations: [accomodationSchema],
     others: [otherSchema],
   },
