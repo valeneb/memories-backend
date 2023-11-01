@@ -1,27 +1,64 @@
 const mongoose = require("mongoose");
 
 const flightSchema = new mongoose.Schema({
-  airline: String,
+  airline: { default: "", type: String },
   flightNumber: {
     type: String,
     required: true,
     unique: true,
     sparse: true,
   },
-  departureAirport: String,
-  arrivalAirport: String,
-  departureDate: Date,
-  departureTime: Date,
-  arrivalTime: Date,
-  returnDate: Date,
-  arrivalDate: Date,
-  comments: String,
-  price: Number,
+  departureAirport: {
+    default: "",
+    type: String,
+    sparse: true,
+  },
+  arrivalAirport: {
+    default: "",
+    type: String,
+    sparse: true,
+  },
+  departureDate: {
+    default: null,
+    type: Date,
+    sparse: true,
+  },
+  departureTime: {
+    default: null,
+    type: Date,
+    sparse: true,
+  },
+  arrivalTime: {
+    default: null,
+    type: Date,
+    sparse: true,
+  },
+  returnDate: {
+    default: null,
+    type: Date,
+    sparse: true,
+  },
+  arrivalDate: {
+    default: null,
+    type: Date,
+    sparse: true,
+  },
+  comments: {
+    default: "",
+    type: String,
+    sparse: true,
+  },
+  price: {
+    default: 0,
+    type: Number,
+    sparse: true,
+  },
 });
 const carSchema = new mongoose.Schema({
   carBrand: {
     default: "",
     type: String,
+    sparse: true,
   },
   carModel: {
     default: false,
@@ -53,20 +90,56 @@ const carSchema = new mongoose.Schema({
   },
 });
 const accomodationSchema = new mongoose.Schema({
-  hotelName: String,
-  address: String,
-  checkInDate: Date,
-  checkOutDate: Date,
-  roomNumber: String,
-  comments: String,
-  price: Number,
+  hotelName: {
+    default: "",
+    type: String,
+  },
+  address: {
+    default: "",
+    type: String,
+  },
+  checkInDate: {
+    default: null,
+    type: Date,
+  },
+  checkOutDate: {
+    default: null,
+    type: Date,
+  },
+  roomNumber: {
+    default: "",
+    type: String,
+  },
+  comments: {
+    default: "",
+    type: String,
+  },
+  price: {
+    default: 0,
+    type: Number,
+  },
 });
 const otherSchema = new mongoose.Schema({
-  title: String,
-  date: Date,
-  hour: Date,
-  comments: String,
-  price: Number,
+  title: {
+    default: "",
+    type: String,
+  },
+  date: {
+    default: null,
+    type: Date,
+  },
+  hour: {
+    default: null,
+    type: Date,
+  },
+  comments: {
+    default: "",
+    type: String,
+  },
+  price: {
+    default: 0,
+    type: Number,
+  },
 });
 
 const travelSchema = new mongoose.Schema({

@@ -2,15 +2,122 @@ const express = require("express");
 const router = express.Router();
 const Travel = require("../../models/travels");
 
+// router.post("/newFlight", async (req, res) => {
+//   try {
+//     const travel = await Travel.findById(req.query._id);
+//     // console.log(travel);
+//     if (!travel) {
+//       res.status(401).json({
+//         result: false,
+//         error:
+//           "i don't find a travel create one and come back to prove your experience",
+//       });
+//     }
+
+//     if (
+//       !travel.travelPlanning ||
+//       !Array.isArray(travel.travelPlanning) ||
+//       travel.travelPlanning.length === 0
+//     ) {
+//       // If travel.travelPlanning doesn't exist or is empty, create an array for it.
+//       travel.travelPlanning = [{ flights: [] }];
+//     }
+//     if (travel._id) {
+//       const {
+//         airline,
+//         departureAirport,
+//         arrivalAirport,
+//         flightNumber,
+//         comments,
+//         price,
+//       } = req.body;
+//       const departureDateParts = req.body.departureDate
+//         ? req.body.departureDate.split("/")
+//         : [];
+//       const returnDateParts = req.body.returnDate
+//         ? req.body.returnDate.split("/")
+//         : [];
+//       const arrivalDateParts = req.body.arrivalDate
+//         ? req.body.arrivalDate.split("/")
+//         : [];
+//       const formattedDepartureDate =
+//         `${departureDateParts[2]}-${departureDateParts[1]}-${departureDateParts[0]}`
+//           ? `${departureDateParts[2]}-${departureDateParts[1]}-${departureDateParts[0]}`
+//           : [];
+//       const formattedArrivalDate =
+//         `${arrivalDateParts[2]}-${arrivalDateParts[1]}-${arrivalDateParts[0]}`
+//           ? `${arrivalDateParts[2]}-${arrivalDateParts[1]}-${arrivalDateParts[0]}`
+//           : [];
+//       const formattedReturnDate =
+//         `${returnDateParts[2]}-${returnDateParts[1]}-${returnDateParts[0]}`
+//           ? `${returnDateParts[2]}-${returnDateParts[1]}-${returnDateParts[0]}`
+//           : [];
+//       const departureTime = new Date(`1970-01-01T${req.body.departureTime}`)
+//         ? new Date(`1970-01-01T${req.body.departureTime}`)
+//         : [];
+//       const arrivalTime = new Date(`1970-01-01T${req.body.arrivalTime}`)
+//         ? new Date(`1970-01-01T${req.body.arrivalTime}`)
+//         : [];
+
+//       const newFlight = {
+//         airline: airline ? airline : "",
+//         departureAirport: departureAirport ? departureAirport : "",
+//         arrivalAirport: arrivalAirport ? arrivalAirport : "",
+//         flightNumber: flightNumber ? flightNumber : 0,
+//         departureDate: formattedDepartureDate ? formattedDepartureDate : [],
+//         returnDate: formattedReturnDate ? formattedReturnDate : [],
+//         arrivalDate: formattedArrivalDate ? formattedArrivalDate : [],
+//         arrivalTime: arrivalTime || null,
+//         departureTime: departureTime || null,
+//         comments: comments || "",
+//         price: price || 0,
+//       };
+
+//       // console.log(newFlight);
+
+//       // // travel.travelPlanning.flights.push(newFlight);
+
+//       // console.log(travel.travelPlanning);
+//       // const updatedTravelFlights =
+//       await Travel.findByIdAndUpdate(req.query._id, {
+//         $push: { "travelPlanning.flights": newFlight },
+//       });
+//       // console.log(updatedTravelFlights);
+//       // const savedFlightInTravel = await travel.save();
+//       res.status(200).json({ result: true, travel: newFlight });
+//     }
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(500).json({ result: false, error: error.message });
+//   }
+// });
+function getDefault(value, defaultValue = "") {
+  return value ? value : defaultValue;
+}
+
+function formatDate(date) {
+  if (date) {
+    const dateParts = date.split("/");
+    return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+  }
+  return null;
+}
+
+function formatTime(time) {
+  if (time) {
+    return new Date(`1970-01-01T${time}`);
+  }
+  return null;
+}
+// TODO
 router.post("/newFlight", async (req, res) => {
   try {
     const travel = await Travel.findById(req.query._id);
-    // console.log(travel);
     if (!travel) {
-      res.status(401).json({
+      return res.status(401).json({
         result: false,
         error:
-          "i don't find a travel create one and come back to prove your experience",
+          "I couldn't find a travel. Create one and come back to prove your experience.",
       });
     }
 
@@ -19,60 +126,43 @@ router.post("/newFlight", async (req, res) => {
       !Array.isArray(travel.travelPlanning) ||
       travel.travelPlanning.length === 0
     ) {
-      // If travel.travelPlanning doesn't exist or is empty, create an array for it.
       travel.travelPlanning = [{ flights: [] }];
     }
-    if (travel._id) {
-      const {
-        airline,
-        departureAirport,
-        arrivalAirport,
-        flightNumber,
-        comments,
-        price,
-      } = req.body;
-      const departureDateParts = req.body.departureDate
-        ? req.body.departureDate.split("/")
-        : [];
-      const returnDateParts = req.body.returnDate
-        ? req.body.returnDate.split("/")
-        : [];
-      const arrivalDateParts = req.body.arrivalDate
-        ? req.body.arrivalDate.split("/")
-        : [];
-      const formattedDepartureDate = `${departureDateParts[2]}-${departureDateParts[1]}-${departureDateParts[0]}`;
-      const formattedArrivalDate = `${arrivalDateParts[2]}-${arrivalDateParts[1]}-${arrivalDateParts[0]}`;
-      const formattedReturnDate = `${returnDateParts[2]}-${returnDateParts[1]}-${returnDateParts[0]}`;
-      const departureTime = new Date(`1970-01-01T${req.body.departureTime}`);
-      const arrivalTime = new Date(`1970-01-01T${req.body.arrivalTime}`);
 
-      const newFlight = {
-        airline: airline || "",
-        departureAirport: departureAirport || "",
-        arrivalAirport: arrivalAirport || "",
-        flightNumber: flightNumber || 0,
-        departureDate: formattedDepartureDate,
-        returnDate: formattedReturnDate,
-        arrivalDate: formattedArrivalDate,
-        departureTime: departureTime || null,
-        arrivalTime: arrivalTime || null,
-        comments: comments || "",
-        price: price || 0,
-      };
+    const {
+      airline,
+      departureAirport,
+      arrivalAirport,
+      flightNumber,
+      comments,
+      price,
+    } = req.body;
 
-      // console.log(newFlight);
+    const formattedDepartureDate = formatDate(req.body.departureDate);
+    const formattedArrivalDate = formatDate(req.body.arrivalDate);
+    const formattedReturnDate = formatDate(req.body.returnDate);
+    const departureTime = formatTime(req.body.departureTime);
+    const arrivalTime = formatTime(req.body.arrivalTime);
 
-      // // travel.travelPlanning.flights.push(newFlight);
+    const newFlight = {
+      airline: getDefault(airline),
+      departureAirport: getDefault(departureAirport),
+      arrivalAirport: getDefault(arrivalAirport),
+      flightNumber: getDefault(flightNumber, 0),
+      departureDate: formattedDepartureDate,
+      returnDate: formattedReturnDate,
+      arrivalDate: formattedArrivalDate,
+      arrivalTime,
+      departureTime,
+      comments: getDefault(comments),
+      price: getDefault(price, 0),
+    };
 
-      // console.log(travel.travelPlanning);
-      const updatedTravelFlights = await Travel.findByIdAndUpdate(
-        req.query._id,
-        { $push: { "travelPlanning.flights": newFlight } }
-      );
-      // console.log(updatedTravelFlights);
-      // const savedFlightInTravel = await travel.save();
-      res.status(200).json({ result: true, travel: updatedTravelFlights });
-    }
+    await Travel.findByIdAndUpdate(req.query._id, {
+      $push: { "travelPlanning.flights": newFlight },
+    });
+
+    res.status(200).json({ result: true, travel: newFlight });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ result: false, error: error.message });
@@ -97,7 +187,7 @@ router.get("/getFlights", async (req, res) => {
 
     // Retrieve all flights from the travel's flight list
     const flights = travel.travelPlanning.flights;
-    console.log(flights);
+    // console.log(flights);
     res.status(200).json({ result: true, flights });
   } catch (error) {
     console.log(error.message);
@@ -241,9 +331,12 @@ router.delete("/deleteFlights", async (req, res) => {
 
     // If flightId is provided, delete only that specific flight
     if (flightId) {
-      const flightTodelete = await Travel.findOneAndUpdate({
-        flightId: flightId,
-      });
+      const flightTodelete = await Travel.findOneAndUpdate(
+        {
+          _id: travelId,
+        },
+        { $pull: { "travelPlanning.flights": { _id: flightId } } }
+      );
       // console.log(flightTodelete);
       // console.log(travel.travelPlanning.flights);
       //  deleteOne({

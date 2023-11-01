@@ -25,6 +25,12 @@ const userSchema = mongoose.Schema({
   language: String,
   avatar: Object,
 
+
+
+  travels: [{ type: mongoose.Schema.Types.ObjectId, ref: "travel" }],
+});
+const User = mongoose.model("users", userSchema);
+module.exports = User;
   // facebookId: String,
   // name: String,
   // email: String,
@@ -35,8 +41,3 @@ const userSchema = mongoose.Schema({
   // token: String,
   // name: String,
   // profilePicture: String,
-
-  travels: [{ type: mongoose.Schema.Types.ObjectId, ref: "travel" }],
-});
-const User = mongoose.model("users", userSchema);
-module.exports = User;

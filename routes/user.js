@@ -147,7 +147,7 @@ router.post("/login", async (req, res) => {
 //   }
 // });
 router.delete("/deleteUser", async (req, res) => {
-  console.log(req.query);
+  // console.log(req.query);
   try {
     if (!req.query.token) {
       res.status(401).json({ result: false, message: "user not found" });
