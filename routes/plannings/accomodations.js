@@ -121,10 +121,10 @@ router.put("/update", async (req, res) => {
       accommodation.address = req.body.address;
     }
     if (req.body.checkInDate) {
-      accommodation.checkInDate = req.body.checkInDate;
+      accommodation.checkInDate = formatDate(req.body.checkInDate);
     }
     if (req.body.checkOutDate) {
-      accommodation.checkOutDate = req.body.checkOutDate;
+      accommodation.checkOutDate = formatDate(req.body.checkOutDate);
     }
     if (req.body.roomNumber) {
       accommodation.roomNumber = req.body.roomNumber;
