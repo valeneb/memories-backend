@@ -212,12 +212,13 @@ router.delete("/deleteTrip", async (req, res) => {
       const deletedDestination = await Travel.findOneAndDelete({
         _id: travelId,
       });
-      const updateUserTravel = await User.findByIdAndUpdate(
+      // const updateUserTravel =
+      await User.findByIdAndUpdate(
         userId,
         { $pull: { travels: travelId } },
         { new: true }
       );
-      console.log(updateUserTravel);
+      // console.log(updateUserTravel);
       if (!deletedDestination) {
         return res
           .status(402)
@@ -227,7 +228,7 @@ router.delete("/deleteTrip", async (req, res) => {
         await Diary.deleteMany({ travel: deletedDestination._id });
       }
 
-      if (deletedDestination.coverImage.secure_url) {
+      if (deletedDestination) {
         await cloudinary.api.delete_resources_by_prefix(
           `memories/travelsCover/${travelId}`
         );
