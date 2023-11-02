@@ -9,6 +9,7 @@ const Diary = require("../models/diaries");
 const Travel = require("../models/travels");
 const User = require("../models/users");
 const isAuthenticated = require("../middleware/isAuthenticated");
+const { check, validationResult } = require("express-validator");
 router.post("/signup", async (req, res) => {
   // const { username, password, email, firstname, lastname } = req.body;
   // console.log(req.files);
@@ -83,18 +84,35 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// Define the login route
-router.post("/login", isAuthenticated, async (req, res) => {
-  try {
-    console.log(req.user);
-    const user = await User.findOne({ email: req.body.email });
-    if (!user.email) {
-      res.status(403).json({
+router.post(
+  "/login",
+  isAuthenticated,
+  [
+    check("email")
+      .isEmail()
+      .withMessage("Invalid email address format")
+      .normalizeEmail(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
         result: false,
-        error: "you have to put a correct mail address",
+        errors: errors.array(),
       });
     }
-    if (user.email) {
+
+    try {
+      const user = await User.findOne({ email: req.body.email });
+
+      if (!user) {
+        return res.status(404).json({
+          result: false,
+          error: "User not found",
+        });
+      }
+
       // Est-ce qu'il a rentré le bon mot de passe ?
       // req.body.password
       // user.hash
@@ -103,9 +121,8 @@ router.post("/login", isAuthenticated, async (req, res) => {
       if (
         SHA256(req.body.password + user.salt).toString(encBase64) === user.hash
       ) {
-        res.status(200).json({
+        return res.status(200).json({
           user: {
-            // _id: user._id,
             token: user.token,
             email: user.email,
             account: user.account,
@@ -114,18 +131,17 @@ router.post("/login", isAuthenticated, async (req, res) => {
             travels: user.travels._id,
           },
         });
-        // console.log(user);
       } else {
-        res.status(401).json({ error: "Unauthorized" });
+        return res.status(401).json({ result: false, error: "Unauthorized" });
       }
-    } else {
-      res.status(400).json({ message: "User not found" });
+    } catch (error) {
+      console.error(error.message);
+      return res
+        .status(500)
+        .json({ result: false, error: "An error occurred" });
     }
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ message: error.message });
   }
-});
+);
 
 // TODO DELETE USER
 
