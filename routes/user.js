@@ -88,10 +88,7 @@ router.post("/login", isAuthenticated, async (req, res) => {
   try {
     console.log(req.user);
     const user = await User.findOne({ email: req.body.email });
-    if (
-      !user.email ||
-      message === "Cannot read properties of null (reading 'email')"
-    ) {
+    if (!user.email) {
       res.status(403).json({
         result: false,
         error: "you have to put a correct mail address",
