@@ -64,12 +64,12 @@ router.post("/newOther", async (req, res) => {
       },
       { new: true }
     );
-    console.log(otherBooking);
+    // console.log(otherBooking);
     const newOtherWithId =
       otherBooking.travelPlanning.others[
         otherBooking.travelPlanning.others.length - 1
       ];
-    res.status(200).json({ result: true, travel: newOtherWithId });
+    res.status(200).json({ result: true, other: newOtherWithId });
     // }
   } catch (error) {
     console.error({ error: error.message });
@@ -112,7 +112,7 @@ router.put("/updateOther", async (req, res) => {
         const formattedHour = formatTime(req.body.hour);
         other.hour = formattedHour;
       }
-      const update = await travel.travelPlanning.others.id(otherId).set(other);
+      const update = travel.travelPlanning.others.id(otherId).set(other);
       //   const updatedCarRental =
       await travel.save();
       return res.status(200).json({ result: true, other: update });

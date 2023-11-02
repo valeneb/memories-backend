@@ -17,7 +17,9 @@ function formatDate(date) {
 
 function formatTime(time) {
   if (time) {
-    return new Date(`1970-01-01T${time}`);
+    const date = new Date(`1970-01-01T${time}`);
+    date.setHours(date.getHours() + 1);
+    return date;
   }
   return null;
 }
