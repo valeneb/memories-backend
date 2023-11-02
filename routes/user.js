@@ -16,14 +16,7 @@ router.post("/signup", async (req, res) => {
     const user = await User.findOne({
       email: req.body.email,
     });
-    if (error.message === "Cannot read properties of null (reading 'email')") {
-      res
-        .status(403)
-        .json({
-          result: false,
-          error: "you have to put a correct mail adrees",
-        });
-    }
+
     if (user.email) {
       return res
         .status(409)
@@ -95,12 +88,21 @@ router.post("/login", isAuthenticated, async (req, res) => {
   try {
     console.log(req.user);
     const user = await User.findOne({ email: req.body.email });
-
+    if (
+      !user.email ||
+      error.message === "Cannot read properties of null (reading 'email')"
+    ) {
+      res.status(403).json({
+        result: false,
+        error: "you have to put a correct mail address",
+      });
+    }
     if (user.email) {
       // Est-ce qu'il a rentré le bon mot de passe ?
       // req.body.password
       // user.hash
       // user.salt
+
       if (
         SHA256(req.body.password + user.salt).toString(encBase64) === user.hash
       ) {
