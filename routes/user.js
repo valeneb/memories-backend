@@ -16,6 +16,14 @@ router.post("/signup", async (req, res) => {
     const user = await User.findOne({
       email: req.body.email,
     });
+    if (error.message === "Cannot read properties of null (reading 'email')") {
+      res
+        .status(403)
+        .json({
+          result: false,
+          error: "you have to put a correct mail adrees",
+        });
+    }
     if (user.email) {
       return res
         .status(409)
