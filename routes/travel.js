@@ -8,7 +8,39 @@ const convertToBase64 = require("../utils/convertToBase64");
 const isAuthenticated = require("../middleware/isAuthenticated");
 
 // TODO CREATE NEWTRAVEL POST
+// RECUPERE PLANNING POUR UN TRAVEL
+router.get("/planning", async (req, res) => {
+  try {
+    const travelId = req.query.travelId;
+    const userId = req.query.userId;
 
+    if (!userId) {
+      res.status(403).json({ result: false, error: "miss user id" });
+    }
+
+    if (!travelId) {
+      res.status(403).json({ result: false, error: "miss travel id" });
+    }
+
+    const findTravel = await Travel.findById(travelId);
+
+    if (!findTravel) {
+      res.status(403).json({ result: false, error: "travel not found" });
+    }
+    if (findTravel.travelPlanning) {
+      // console.log('planning', findTravel.travelPlanning);
+      res
+        .status(200)
+        .json({ result: true, planning: findTravel.travelPlanning });
+    } else {
+      res
+        .status(401)
+        .json({ result: false, error: "you have to register a new travel" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 router.post("/newTravel", isAuthenticated, async (req, res) => {
   try {
     if (req.user) {
