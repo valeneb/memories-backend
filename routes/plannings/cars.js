@@ -162,131 +162,49 @@ router.put("/updateCarRental", async (req, res) => {
   }
 });
 
-// router.delete("/deleteCarRental", async (req, res) => {
-//   //   console.log(req.query);
-//   try {
-//     const travelId = req.query.travelId;
-//     const carRentalId = req.query.carRentalId;
-//     const travel = await Travel.findById(travelId);
-//     console.log(travelId);
-//     if (!travel) {
-//       res.status(404).json({ resukt: false, error: error.message });
-//     }
-//     console.log(carRentalId);
-//     if (!carRentalId) {
-//       res.status(404).json({
-//         result: false,
-//         error: "This rent is not found here you have to create it",
-//       });
-//     }
-
-//     const carRentalToDelete = await Travel.findByIdAndUpdate(travelId, {
-//       $pull: { "travelPlanning.carRental": carRentalId },
-//     });
-//     console.log(carRentalToDelete.travelPlanning.carRental);
-//     if (carRentalToDelete.deletedCount >= 0) {
-//       await travel.save();
-//       res.status(200).json({ result: true, travel: carRentalToDelete });
-//     }
-//   } catch (error) {
-//     console.log(error.message);
-//     res.status(500).json({ result: false, error: "An error occurred" });
-//   }
-// });
-// router.delete("/deleteCarRental", async (req, res) => {
-//   try {
-//     const travelId = req.query._id;
-//     const carRentalId = req.query._id;
-//     const travel = await Travel.findById(travelId);
-
-//     if (!travel) {
-//       const error = new Error("Travel not found");
-//       res.status(404).json({ result: false, error: error.message });
-//     }
-
-//     if (!carRentalId) {
-//       res.status(404).json({
-//         result: false,
-//         error: "This rent is not found here you have to create it",
-//       });
-//     }
-
-//     if (carRentalId) {
-//       const carRentalToDelete = await Travel.findOneAndDelete({
-//         _id: carRentalId,
-//       });
-
-//       if (carRentalToDelete && carRentalToDelete.deletedCount > 0) {
-//         res.status(200).json({ result: true, travel: carRentalToDelete });
-//       }
-//     }
-//   } catch (error) {
-//
-//   }
-// });
-// router.delete("/deleteCarRental", async (req, res) => {
-//   try {
-//     const travelId = req.query.travelId;
-//     const carRentalId = req.query.carRentalId;
-//
-//     console.log(carRental);
-//     // const carRentalToDelete = travel.travelPlanning.carRental.id(carRentalId);
-//     // console.log(carRentalToDelete);
-
-//     // if (!carRentalToDelete) {
-//     //   return res.status(404).json({
-//     //     result: false,
-//     //     error: "Car rental not found in the travel plan",
-//     //   });
-//     // }
-
-//     // carRental.delete();
-//     // await travel.save();
-//     return res.status(200).json({ result: true, travel: travel });
-//   } catch (error) {
-//     return res.status(500).json({ result: false, error: "An error occurred" });
-//   }
-// });
 router.delete("/deleteCarRental", async (req, res) => {
   try {
     const travelId = req.query.travelId;
     const carRentalId = req.query.carRentalId;
+
     if (!travelId) {
       return res.status(404).json({
         result: false,
         error: "Travel not found",
       });
     }
+
     if (!carRentalId) {
       return res.status(404).json({
         result: false,
-        error: "carRental not found in this travel",
+        error: "Car rental not found in this travel",
       });
     }
+
     const travel = await Travel.findById(travelId);
 
     if (!travel) {
       return res.status(404).json({ result: false, error: "Travel not found" });
     }
-    const carRental = travel.travelPlanning.carRentals.findOneAndDelete(
-      (carRentalItem) => carRentalId.toString() === carRentalItem._id.toString()
-    );
-    if (!carRental) {
-      res
-        .status(404)
-        .json({ result: false, error: "carRental not found in the planning" });
-    }
-    const updatedTravel = await Travel.findOneAndUpdate(
+
+    const carRentalToDelete = await Travel.findOneAndUpdate(
       { _id: travelId },
       { $pull: { "travelPlanning.carRentals": { _id: carRentalId } } },
       { new: true }
-    );
+    ).select("travelPlanning.carRentals");
 
-    if (!updatedTravel) {
-      return res.status(404).json({ result: false, error: "Travel not found" });
+    if (
+      !carRentalToDelete ||
+      carRentalToDelete.travelPlanning.carRentals.length === 0
+    ) {
+      return res.status(404).json({
+        result: false,
+        error: "Car rental not found in this travel",
+      });
     }
-    const updatedCarRental = updatedTravel.travelPlanning.carRentals;
-    return res.status(200).json({ result: true, carRental: updatedCarRental });
+
+    const deletedCarRental = carRentalToDelete.travelPlanning.carRentals;
+    res.status(200).json({ result: true, carRental: deletedCarRental });
   } catch (error) {
     return res.status(500).json({ result: false, error: "An error occurred" });
   }

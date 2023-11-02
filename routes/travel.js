@@ -44,7 +44,7 @@ router.get("/planning", async (req, res) => {
 router.post("/newTravel", async (req, res) => {
   console.log(req.body);
   try {
-    userId = req.body.userId;
+    const userId = req.body.userId;
     const user = await User.findOne({ _id: userId });
     if (user) {
       console.log(user);
