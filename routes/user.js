@@ -16,7 +16,7 @@ router.post("/signup", async (req, res) => {
     const user = await User.findOne({
       email: req.body.email,
     });
-    if (user) {
+    if (user.email) {
       return res
         .status(409)
         .json({ message: "This email already has an account" });
@@ -83,11 +83,12 @@ router.post("/signup", async (req, res) => {
 });
 
 // Define the login route
-router.post("/login", async (req, res) => {
+router.post("/login", isAuthenticated, async (req, res) => {
   try {
+    console.log(req.user);
     const user = await User.findOne({ email: req.body.email });
 
-    if (user) {
+    if (user.email) {
       // Est-ce qu'il a rentré le bon mot de passe ?
       // req.body.password
       // user.hash

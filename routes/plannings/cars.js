@@ -91,7 +91,7 @@ router.get("/", async (req, res) => {
     if (!travel) {
       res.json(404).json({ result: false, error: "Travel not found" });
     }
-    const carRental = travel.travelPlanning.carRental;
+    const carRental = travel.travelPlanning.carRentals;
     console.log(carRental);
     res.status(200).json({ result: true, travel: carRental });
   } catch (error) {
