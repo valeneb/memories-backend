@@ -5,7 +5,7 @@ const Travel = require("../models/travels");
 const Diary = require("../models/diaries");
 const cloudinary = require("cloudinary").v2;
 const convertToBase64 = require("../utils/convertToBase64");
-const isAuthenticated = require("../middleware/isAuthenticated");
+// const isAuthenticated = require("../middleware/isAuthenticated");isAuthenticated,
 
 // TODO CREATE NEWTRAVEL POST
 // RECUPERE PLANNING POUR UN TRAVEL
@@ -41,9 +41,13 @@ router.get("/planning", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.post("/newTravel", isAuthenticated, async (req, res) => {
+router.post("/newTravel", async (req, res) => {
+  console.log(req.body);
   try {
-    if (req.user) {
+    userId = req.body.userId;
+    const user = await User.findOne({ _id: userId });
+    if (user) {
+      console.log(user);
       // Convert the dates from "DD/MM/YYYY" to valid JavaScript format "YYYY-MM-DD"
       const departureDateParts = req.body.departure.split("/");
       const formattedDepartureDate = `${departureDateParts[2]}-${departureDateParts[1]}-${departureDateParts[0]}`;
@@ -60,7 +64,7 @@ router.post("/newTravel", isAuthenticated, async (req, res) => {
           type: "Point",
           coordinates: [latitude, longitude],
         },
-        user: req.user._id,
+        user: user._id,
       });
 
       if (req.files || req.files?.coverImage) {
@@ -79,7 +83,7 @@ router.post("/newTravel", isAuthenticated, async (req, res) => {
       const savedTrip = await newTrip.save();
 
       // Now, update the user's travels
-      const user = await User.findById(req.user._id);
+      const user = await User.findById(user._id);
       user.travels.push(savedTrip._id);
       await user.save();
 

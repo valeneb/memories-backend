@@ -81,7 +81,7 @@ router.post("/newFlight", async (req, res) => {
       flightBooking.travelPlanning.flights[
         flightBooking.travelPlanning.flights.length - 1
       ];
-    res.status(200).json({ result: true, travel: newFlightWithId });
+    res.status(200).json({ result: true, flight: newFlightWithId });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ result: false, error: error.message });

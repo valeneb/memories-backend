@@ -147,10 +147,13 @@ router.put("/updateCarRental", async (req, res) => {
       }
 
       //   const victoire =
-      await travel.travelPlanning.carRentals.id(carRentalId).set(carRental);
+      const updatedCarRental = travel.travelPlanning.carRentals
+        .id(carRentalId)
+        .set(carRental);
       //   console.log(victoire);
       // TODO JUST SEND TO THE FRONT ELEMENT UPDATE
-      const updatedCarRental = await travel.save();
+      // const updatedCarRental =
+      await travel.save();
       res.status(200).json({ result: true, travel: updatedCarRental });
     }
   } catch (error) {
