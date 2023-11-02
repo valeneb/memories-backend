@@ -74,6 +74,7 @@ router.post("/newTravel", isAuthenticated, async (req, res) => {
         );
 
         newTrip.coverImage = resultToUpload.secure_url;
+        newTrip.account.avatar = resultToUpload.public_id;
       }
 
       // Save the newTrip first
@@ -171,6 +172,7 @@ router.put("/update", async (req, res) => {
       );
       // console.log(uploadedCoverImage);
       travelToModify.coverImage = uploadedCoverImage.secure_url;
+      travelToModify.coverImage = uploadedCoverImage.public_id;
     }
     // console.log(travelToModify);
     // Effectuez la mise à jour en utilisant findOneAndUpdate.
@@ -210,6 +212,12 @@ router.delete("/deleteTrip", async (req, res) => {
       const deletedDestination = await Travel.findOneAndDelete({
         _id: travelId,
       });
+      const updateUserTravel = await User.findByIdAndUpdate(
+        userId,
+        { $pull: { travels: travelId } },
+        { new: true }
+      );
+      console.log(updateUserTravel);
       if (!deletedDestination) {
         return res
           .status(402)

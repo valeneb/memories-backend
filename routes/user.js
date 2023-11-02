@@ -10,9 +10,8 @@ const Travel = require("../models/travels");
 const User = require("../models/users");
 const isAuthenticated = require("../middleware/isAuthenticated");
 const { check, validationResult } = require("express-validator");
+
 router.post("/signup", async (req, res) => {
-  // const { username, password, email, firstname, lastname } = req.body;
-  // console.log(req.files);
   try {
     const user = await User.findOne({
       email: req.body.email,
@@ -28,8 +27,7 @@ router.post("/signup", async (req, res) => {
         const salt = uid2(16);
 
         const hash = SHA256(req.body.password + salt).toString(encBase64);
-        // console.log(hash);
-        // console.log(salt);
+
         const newUser = await new User({
           salt: salt,
           hash: hash,
@@ -43,10 +41,7 @@ router.post("/signup", async (req, res) => {
 
           //!  password: password, ne pas enregistrer où le placer dans la nouvelle variable
         });
-        // if (!req.files || !req.files.avatar) {
-        //   return res.status(400).json({ message: "No file uploaded" });
-        // }
-        // console.log(req.files.avatar);
+
         if (req.files && req.files?.avatar) {
           const result = await cloudinary.uploader.upload(
             convertToBase64(req.files.avatar),
@@ -60,6 +55,7 @@ router.post("/signup", async (req, res) => {
           //! console.log(result); celui qui renvoie toutes les infos utilisateurs
           // console.log(req.files.avatar);
           newUser.account.avatar = result.secure_url;
+          newUser.account.avatar = result.public_id;
         }
 
         await newUser.save();
@@ -114,9 +110,6 @@ router.post(
       }
 
       // Est-ce qu'il a rentré le bon mot de passe ?
-      // req.body.password
-      // user.hash
-      // user.salt
 
       if (
         SHA256(req.body.password + user.salt).toString(encBase64) === user.hash
@@ -165,86 +158,167 @@ router.delete("/deleteUser", async (req, res) => {
     }
     if (userToDelete) {
       // console.log(userToDelete);
-      if (userToDelete.account.avatar.secure_url) {
+      if (
+        !userToDelete.account.avatar.secure_url ||
+        userToDelete.account.avatar.secure_url
+      ) {
+        // Supprimer les voyages associés à l'utilisateur
+        await Travel.deleteMany({ user: userToDelete._id });
+
+        // Supprimer les journaux associés aux voyages supprimés
+        await Diary.deleteMany({ travel: { $in: userToDelete.travels } });
+
         await cloudinary.api.delete_resources_by_prefix(
           `memories/users/${userToDelete._id}`
         );
         await cloudinary.api.delete_folder(
           `memories/users/${userToDelete._id}`
         );
+        return res.status(201).json({ result: true, user: userToDelete });
       }
 
       // Supprimer les voyages associés à l'utilisateur
-      await Travel.deleteMany({ user: userToDelete._id });
-
-      // Supprimer les journaux associés aux voyages supprimés
-      await Diary.deleteMany({ travel: { $in: userToDelete.travels } });
-
-      res.status(201).json({ result: true, user: userToDelete });
     }
+    await userToDelete.remove();
   } catch (error) {
     console.error({ error: error.message });
     res.status(500).json({ result: false, error: "An error occurred" });
   }
 });
 // TODO UPDATE USER PROFIL AND TRY AGAIN WITH AVATAR
-router.put("/updateUser", isAuthenticated, async (req, res) => {
-  // console.log(req.user);
-  try {
-    const user = await User.findOne({ _id: req.user._id });
-    // console.log(user);
-    if (!user) {
-      res.status(404).json({ result: false, error: "user not logged in" });
-    }
-    if (req.body.username) {
-      user.account.username = req.body.username;
-    }
-    if (req.body.firstname) {
-      user.firstname = req.body.firstname;
-    }
+// router.put("/updateUser", isAuthenticated, async (req, res) => {
+//   // console.log(req.user);
+//   try {
+//     const user = await User.findOne({ _id: req.user._id });
+//     // console.log(user);
+//     if (!user) {
+//       res.status(404).json({ result: false, error: "user not logged in" });
+//     }
+//     if (req.body.username) {
+//       user.account.username = req.body.username;
+//     }
+//     if (req.body.firstname) {
+//       user.firstname = req.body.firstname;
+//     }
 
-    if (req.body.lastname) {
-      user.lastname = req.body.lastname;
-    }
-    // const token = uid2(64);
-    if (req.body.email) {
-      user.email = req.body.email;
-    }
-    if (req.body.newPassword) {
-      const newSalt = uid2(16);
-      const newPasswordHash = SHA256(req.body.newPassword + newSalt).toString(
-        encBase64
-      );
-      user.hash = newPasswordHash;
-      user.salt = newSalt;
-    }
+//     if (req.body.lastname) {
+//       user.lastname = req.body.lastname;
+//     }
+//     // const token = uid2(64);
+//     if (req.body.email) {
+//       user.email = req.body.email;
+//     }
+//     if (req.body.newPassword) {
+//       const newSalt = uid2(16);
+//       const newPasswordHash = SHA256(req.body.newPassword + newSalt).toString(
+//         encBase64
+//       );
+//       user.hash = newPasswordHash;
+//       user.salt = newSalt;
+//     }
 
-    if (req.files?.avatar) {
-      // console.log(req.files.avatar);
-      if (!user.account.avatar) {
-        user.account.avatar = {};
+//     if (req.files?.avatar) {
+//       // console.log(req.files.avatar);
+//       if (!user.account.avatar) {
+//         user.account.avatar = {};
+//       }
+//       if (user.account.avatar.public_id) {
+//         await cloudinary.uploader.destroy(user.account.avatar.public_id);
+//       }
+//       const uploadedUserAccountAvatar = await cloudinary.uploader.upload(
+//         convertToBase64(req.files.avatar),
+//         {
+//           folder: `memories/users/${user._id}`,
+//           public_id: "avatar",
+//         }
+//       );
+//       user.account.avatar = uploadedUserAccountAvatar.secure_url;
+//     }
+//     const updatedUser = await User.findByIdAndUpdate(
+//       { _id: user._id },
+//       { $set: user },
+//       { new: true }
+//     );
+//     res.status(200).json({ result: true, user: updatedUser });
+//   } catch (error) {
+//     console.error({ error: error.message });
+//     res.status(500).json({ result: false, error: "An error occurred" });
+//   }
+// });
+
+router.put(
+  "/updateUser",
+  isAuthenticated,
+  [
+    check("email")
+      .isEmail()
+      .withMessage("Invalid email address format")
+      .normalizeEmail(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        result: false,
+        errors: errors.array(),
+      });
+    }
+    try {
+      const userId = req.user._id;
+      const userUpdates = {};
+
+      if (req.body.username)
+        userUpdates["account.username"] = req.body.username;
+      if (req.body.firstname) userUpdates.firstname = req.body.firstname;
+      if (req.body.lastname) userUpdates.lastname = req.body.lastname;
+      if (req.body.email) userUpdates.email = req.body.email;
+      if (req.body.newPassword) {
+        const newSalt = uid2(16);
+        const newPasswordHash = SHA256(req.body.newPassword + newSalt).toString(
+          encBase64
+        );
+        userUpdates.hash = newPasswordHash;
+        userUpdates.salt = newSalt;
       }
-      if (user.account.avatar.public_id) {
-        await cloudinary.uploader.destroy(user.account.avatar.public_id);
-      }
-      const uploadedUserAccountAvatar = await cloudinary.uploader.upload(
-        convertToBase64(req.files.avatar),
-        {
-          folder: `memories/users/${user._id}`,
-          public_id: "avatar",
+
+      if (req.files?.avatar) {
+        if (!userUpdates["account.avatar"]) userUpdates["account.avatar"] = {};
+
+        if (userUpdates["account.avatar"].public_id) {
+          await cloudinary.uploader.destroy(
+            userUpdates["account.avatar"].public_id
+          );
         }
+
+        const uploadedUserAccountAvatar = await cloudinary.uploader.upload(
+          convertToBase64(req.files.avatar),
+          {
+            folder: `memories/users/${userId}`,
+            public_id: "avatar",
+          }
+        );
+        userUpdates["account.avatar"].secure_url =
+          uploadedUserAccountAvatar.secure_url;
+        userUpdates["account.avatar"].public_id =
+          uploadedUserAccountAvatar.public_id;
+      }
+
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: userId },
+        { $set: userUpdates },
+        { new: true }
       );
-      user.account.avatar = uploadedUserAccountAvatar.secure_url;
+
+      if (!updatedUser) {
+        return res.status(404).json({ result: false, error: "User not found" });
+      }
+
+      res.status(200).json({ result: true, user: updatedUser });
+    } catch (error) {
+      console.error({ error: error.message });
+      res.status(500).json({ result: false, error: "An error occurred" });
     }
-    const updatedUser = await User.findByIdAndUpdate(
-      { _id: user._id },
-      { $set: user },
-      { new: true }
-    );
-    res.status(200).json({ result: true, user: updatedUser });
-  } catch (error) {
-    console.error({ error: error.message });
-    res.status(500).json({ result: false, error: "An error occurred" });
   }
-});
+);
 module.exports = router;
