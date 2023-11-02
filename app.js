@@ -12,7 +12,7 @@ var logger = require("morgan");
 const fileUpload = require("express-fileupload");
 var usersRouter = require("./routes/user");
 
-var planningRouter = require("./routes/plannings/allPlannings");
+var planningRouter = require("./routes/plannings/allPictures");
 const travelRouter = require("./routes/travel");
 const diaryRouter = require("./routes/diary");
 const flightRouter = require("./routes/plannings/flights");
