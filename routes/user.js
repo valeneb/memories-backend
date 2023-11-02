@@ -90,7 +90,7 @@ router.post("/login", isAuthenticated, async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     if (
       !user.email ||
-      error.message === "Cannot read properties of null (reading 'email')"
+      message === "Cannot read properties of null (reading 'email')"
     ) {
       res.status(403).json({
         result: false,
