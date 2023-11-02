@@ -20,10 +20,6 @@ const userSchema = mongoose.Schema({
   hash: String,
   salt: String,
 
-  // phoneNumber: Number,
-  // birthDate: Date,
-  // language: String,
-
   travels: [{ type: mongoose.Schema.Types.ObjectId, ref: "travel" }],
 });
 const User = mongoose.model("users", userSchema);

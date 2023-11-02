@@ -25,12 +25,12 @@ const flightSchema = new mongoose.Schema({
   },
   departureTime: {
     default: null,
-    type: Date,
+    type: String,
     sparse: true,
   },
   arrivalTime: {
     default: null,
-    type: Date,
+    type: String,
     sparse: true,
   },
   returnDate: {
@@ -130,7 +130,7 @@ const otherSchema = new mongoose.Schema({
   },
   hour: {
     default: null,
-    type: Date,
+    type: String,
   },
   comments: {
     default: "",

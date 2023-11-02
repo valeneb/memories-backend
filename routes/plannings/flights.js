@@ -8,7 +8,6 @@ function getDefault(value, defaultValue = "") {
 
 function formatDate(date) {
   if (date) {
-    // console.log(date);
     const dateParts = date.split("/");
     return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
   }
@@ -17,9 +16,7 @@ function formatDate(date) {
 
 function formatTime(time) {
   if (time) {
-    const date = new Date(`1970-01-01T${time}`);
-    date.setHours(date.getHours() + 1);
-    return date;
+    return `${time}`;
   }
   return null;
 }
@@ -84,7 +81,7 @@ router.post("/newFlight", async (req, res) => {
       flightBooking.travelPlanning.flights[
         flightBooking.travelPlanning.flights.length - 1
       ];
-    res.status(200).json({ result: true, flights: newFlightWithId });
+    res.status(200).json({ result: true, travel: newFlightWithId });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ result: false, error: error.message });
@@ -108,7 +105,7 @@ router.get("/getFlights", async (req, res) => {
   try {
     // Retrieve all flights from the travel's flight list
     const flights = travel.travelPlanning.flights;
-    // console.log(flights);
+
     res.status(200).json({ result: true, flights });
   } catch (error) {
     console.log(error.message);
@@ -117,15 +114,96 @@ router.get("/getFlights", async (req, res) => {
 });
 
 // Update an existing flight within a travel
+// router.put("/updateFlight", async (req, res) => {
+
+//   try {
+//     const travelId = req.query.travelId;
+//     const flightId = req.query.flightId;
+
+//     // Find the travel by ID
+//     const travel = await Travel.findById(travelId);
+//     // console.log(travel);
+//     if (!travel) {
+//       return res.status(404).json({
+//         result: false,
+//         error: "Travel not found",
+//       });
+//     }
+
+//     const flight = travel.travelPlanning.flights.find(
+//       (flightItem) => flightId.toString() === flightItem._id.toString()
+//     );
+//     if (!flight) {
+//       return res.status(404).json({
+//         result: false,
+//         error: "Flight not found in this travel",
+//       });
+//     }
+//     // console.log(flight);
+//     if (flight) {
+//       if (req.body.airline) {
+//         flight.airline = req.body.airline;
+//       }
+//       if (req.body.departureAirport) {
+//         flight.departureAirport = req.body.departureAirport;
+//       }
+
+//       if (req.body.arrivalAirport) {
+//         flight.arrivalAirport = req.body.arrivalAirport;
+//       }
+//       if (req.body.flightNumber) {
+//         flight.flightNumber = req.body.flightNumber;
+//       }
+
+//       if (req.body.departureDate && formattedDepartureDate) {
+//         const departureDateParts = req.body.departureDate.split("/");
+//         const formattedDepartureDate = `${departureDateParts[2]}-${departureDateParts[1]}-${departureDateParts[0]}`;
+//         flight.departureDate = formattedDepartureDate;
+//       }
+//       if (req.body.returnDate) {
+//         const returnDateParts = req.body.returnDate.split("/");
+//         const formattedReturnDate = `${returnDateParts[2]}-${returnDateParts[1]}-${returnDateParts[0]}`;
+//         flight.returnDate = formattedReturnDate;
+//       }
+//       if (req.body.arrivalDate) {
+//         const arrivalDateParts = req.body.arrivalDate.split("/");
+
+//         const formattedArrivalDate = `${arrivalDateParts[2]}-${arrivalDateParts[1]}-${arrivalDateParts[0]}`;
+//         flight.arrivalDate = formattedArrivalDate;
+//       }
+//       const departureTime = `${req.body.departureTime}`;
+//       if (req.body.departureTime && departureTime) {
+//         flight.departureTime = req.body.departureTime;
+//       }
+//       const arrivalTime = `${req.body.arrivalTime}`;
+//       if (req.body.arrivalTime && arrivalTime) {
+//         flight.arrivalTime = req.body.arrivalTime;
+//       }
+//       if (req.body.comments) {
+//         flight.comments = req.body.comments;
+//       }
+//       if (req.body.price) {
+//         flight.price = req.body.price;
+//       }
+
+//       const updatedFlight = travel.travelPlanning.flights
+//         .id(flightId)
+//         .set(flight);
+
+//       await travel.save();
+//       res.status(200).json({ result: true, flight: updatedFlight });
+//     }
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(500).json({ result: false, error: error.message });
+//   }
+// });
 router.put("/updateFlight", async (req, res) => {
-  // console.log(req.query);
   try {
     const travelId = req.query.travelId;
     const flightId = req.query.flightId;
 
-    // Find the travel by ID
     const travel = await Travel.findById(travelId);
-    // console.log(travel);
     if (!travel) {
       return res.status(404).json({
         result: false,
@@ -133,12 +211,6 @@ router.put("/updateFlight", async (req, res) => {
       });
     }
 
-    // Find the flight within the travel's flight listconst flight =
-    // const mapOfFlights = travel.travelPlanning.flights.map((flightItem) => {
-    //   // console.log(flightItem._id);
-
-    //   if (flightId.toString() === flightItem._id.toString()) {
-    //     console.log("j'ai trouvé le vol ");
     const flight = travel.travelPlanning.flights.find(
       (flightItem) => flightId.toString() === flightItem._id.toString()
     );
@@ -148,86 +220,58 @@ router.put("/updateFlight", async (req, res) => {
         error: "Flight not found in this travel",
       });
     }
-    // console.log(flight);
-    if (flight) {
-      // Update flight properties
-      // const updatedFlight = {
-      //   airline: req.body.airline || "",
-      //   departureAirport: req.body.departureAirport || "",
-      //   arrivalAirport: req.body.arrivalAirport || "",
-      //   flightNumber: req.body.flightNumber || "",
-      //   departureDate: formattedDepartureDate,
-      //   returnDate: formattedReturnDate,
-      //   arrivalDate: formattedArrivalDate,
-      //   departureTime: departureTime ,
-      //   arrivalTime: arrivalTime ,
-      //   comments: req.body.comments ,
-      //   price: req.body.price ,
-      // };
 
-      // ...add other properties you want to update
+    // Utilisez les fonctions pour formater les données de vol
+    flight.airline = getDefault(req.body.airline, flight.airline);
+    flight.departureAirport = getDefault(
+      req.body.departureAirport,
+      flight.departureAirport
+    );
+    flight.arrivalAirport = getDefault(
+      req.body.arrivalAirport,
+      flight.arrivalAirport
+    );
+    flight.flightNumber = getDefault(
+      req.body.flightNumber,
+      flight.flightNumber
+    );
+    flight.comments = getDefault(req.body.comments, flight.comments);
+    flight.price = getDefault(req.body.price, flight.price);
 
-      if (req.body.airline) {
-        flight.airline = req.body.airline;
-      }
-      if (req.body.departureAirport) {
-        flight.departureAirport = req.body.departureAirport;
-      }
-
-      if (req.body.arrivalAirport) {
-        flight.arrivalAirport = req.body.arrivalAirport;
-      }
-      if (req.body.flightNumber) {
-        flight.flightNumber = req.body.flightNumber;
-      }
-
-      if (req.body.departureDate && formattedDepartureDate) {
-        const departureDateParts = req.body.departureDate.split("/");
-        const formattedDepartureDate = `${departureDateParts[2]}-${departureDateParts[1]}-${departureDateParts[0]}`;
-        flight.departureDate = formattedDepartureDate;
-      }
-      if (req.body.returnDate) {
-        const returnDateParts = req.body.returnDate.split("/");
-        const formattedReturnDate = `${returnDateParts[2]}-${returnDateParts[1]}-${returnDateParts[0]}`;
-        flight.returnDate = formattedReturnDate;
-      }
-      if (req.body.arrivalDate) {
-        const arrivalDateParts = req.body.arrivalDate.split("/");
-
-        const formattedArrivalDate = `${arrivalDateParts[2]}-${arrivalDateParts[1]}-${arrivalDateParts[0]}`;
-        flight.arrivalDate = formattedArrivalDate;
-      }
-      const departureTime = new Date(`1970-01-01T${req.body.departureTime}`);
-      if (req.body.departureTime && departureTime) {
-        flight.departureTime = req.body.departureTime;
-      }
-      const arrivalTime = new Date(`1970-01-01T${req.body.arrivalTime}`);
-      if (req.body.arrivalTime && arrivalTime) {
-        flight.arrivalTime = req.body.arrivalTime;
-      }
-      if (req.body.comments) {
-        flight.comments = req.body.comments;
-      }
-      if (req.body.price) {
-        flight.price = req.body.price;
-      }
-      // const updatedFlight = await Travel.findOneAndUpdate(
-      //   { flightId },
-      //   { $set: flight },
-      //   { new: true }
-      // );
-      // const victoire =
-      await travel.travelPlanning.flights.id(flightId).set(flight);
-
-      // console.log(victoire);
-      const updatedTravel = await travel.save();
-      res.status(200).json({ result: true, flight: updatedTravel });
+    const formattedDepartureDate = formatDate(req.body.departureDate);
+    if (formattedDepartureDate) {
+      flight.departureDate = formattedDepartureDate;
     }
+
+    const formattedReturnDate = formatDate(req.body.returnDate);
+    if (formattedReturnDate) {
+      flight.returnDate = formattedReturnDate;
+    }
+
+    const formattedArrivalDate = formatDate(req.body.arrivalDate);
+    if (formattedArrivalDate) {
+      flight.arrivalDate = formattedArrivalDate;
+    }
+
+    const formattedDepartureTime = formatTime(req.body.departureTime);
+    if (formattedDepartureTime) {
+      flight.departureTime = formattedDepartureTime;
+    }
+
+    const formattedArrivalTime = formatTime(req.body.arrivalTime);
+    if (formattedArrivalTime) {
+      flight.arrivalTime = formattedArrivalTime;
+    }
+
+    await travel.save();
+
+    res.status(200).json({ result: true, flight: flight });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ result: false, error: error.message });
   }
 });
+
 // Delete all flights or a single flight of a specific travel
 router.delete("/deleteFlight", async (req, res) => {
   try {
@@ -271,18 +315,11 @@ router.delete("/deleteFlight", async (req, res) => {
       // Save the updated travel with flights removed
       const deletedFlight = flightToDelete.travelPlanning.flights;
       res.status(200).json({ result: true, flight: deletedFlight });
-      // const updatedTravel =
-      // await travel.save();
-
-      // console.log(updatedTravel);
     }
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ result: false, error: error.message });
   }
 });
-//  else {
-//   // If flightId is not provided, delete all flights of the travel
-//   travel.travelPlanning.flights = [];
-// }
+
 module.exports = router;
