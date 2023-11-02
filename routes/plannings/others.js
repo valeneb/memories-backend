@@ -15,9 +15,7 @@ function formatDate(date) {
 
 function formatTime(time) {
   if (time) {
-    const date = `${time}`;
-    date.setHours(date.getHours() + 1);
-    return date;
+    return `${time}`;
   }
   return null;
 }
