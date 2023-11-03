@@ -211,20 +211,23 @@ router.delete("/deleteTrip", async (req, res) => {
       error: "You must provide the _id of the travel to delete.",
     });
   }
-  console.log(userId);
-  console.log(travelId);
+  // console.log(userId);
+  // console.log(travelId);
   try {
     if (travelId) {
       // const user =
-      await User.findByIdAndUpdate(
-        { _id: userId },
-        { $pull: { travels: travelId } },
-        { new: true }
-      );
+
       const deletedDestination = await Travel.findOneAndDelete({
         _id: travelId,
       });
       // const updateUserTravel =
+      if (userId) {
+        await User.findByIdAndUpdate(
+          userId,
+          { $pull: { travels: travelId } },
+          { new: true }
+        );
+      }
 
       // console.log(user);
       if (!deletedDestination) {
