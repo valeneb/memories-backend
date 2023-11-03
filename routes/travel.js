@@ -74,7 +74,7 @@ router.post("/newTravel", isAuthenticated, async (req, res) => {
         );
 
         newTrip.coverImage = resultToUpload.secure_url;
-        newTrip.account.coverImage = resultToUpload.public_id;
+        newTrip.coverImage = resultToUpload.public_id;
       }
 
       // Save the newTrip first

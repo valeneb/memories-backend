@@ -143,6 +143,7 @@ const otherSchema = new mongoose.Schema({
 });
 
 const travelSchema = new mongoose.Schema({
+  destination: { type: mongoose.Schema.Types.ObjectId, ref: "Destination" },
   destination: String,
   departure: String,
   return: String,
