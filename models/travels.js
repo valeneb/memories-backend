@@ -143,7 +143,6 @@ const otherSchema = new mongoose.Schema({
 });
 
 const travelSchema = new mongoose.Schema({
-  destination: { type: mongoose.Schema.Types.ObjectId, ref: "Destination" },
   destination: String,
   departure: String,
   return: String,
@@ -160,6 +159,7 @@ const travelSchema = new mongoose.Schema({
     },
   },
   coverImage: { type: mongoose.Schema.Types.Mixed, default: {} },
+
   travelDiary: [{ type: mongoose.Schema.Types.ObjectId, ref: "Diary" }],
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   travelPlanning: {
@@ -175,3 +175,4 @@ const travelSchema = new mongoose.Schema({
 const Travel = mongoose.model("travels", travelSchema);
 
 module.exports = Travel;
+// destination: { type: mongoose.Schema.Types.ObjectId, ref: "Destination" },

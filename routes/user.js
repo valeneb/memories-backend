@@ -202,65 +202,6 @@ router.delete("/deleteUser", async (req, res) => {
   }
 });
 // TODO UPDATE USER PROFIL AND TRY AGAIN WITH AVATAR
-// router.put("/updateUser", isAuthenticated, async (req, res) => {
-//   // console.log(req.user);
-//   try {
-//     const user = await User.findOne({ _id: req.user._id });
-//     // console.log(user);
-//     if (!user) {
-//       res.status(404).json({ result: false, error: "user not logged in" });
-//     }
-//     if (req.body.username) {
-//       user.account.username = req.body.username;
-//     }
-//     if (req.body.firstname) {
-//       user.firstname = req.body.firstname;
-//     }
-
-//     if (req.body.lastname) {
-//       user.lastname = req.body.lastname;
-//     }
-//     // const token = uid2(64);
-//     if (req.body.email) {
-//       user.email = req.body.email;
-//     }
-//     if (req.body.newPassword) {
-//       const newSalt = uid2(16);
-//       const newPasswordHash = SHA256(req.body.newPassword + newSalt).toString(
-//         encBase64
-//       );
-//       user.hash = newPasswordHash;
-//       user.salt = newSalt;
-//     }
-
-//     if (req.files?.avatar) {
-//       // console.log(req.files.avatar);
-//       if (!user.account.avatar) {
-//         user.account.avatar = {};
-//       }
-//       if (user.account.avatar.public_id) {
-//         await cloudinary.uploader.destroy(user.account.avatar.public_id);
-//       }
-//       const uploadedUserAccountAvatar = await cloudinary.uploader.upload(
-//         convertToBase64(req.files.avatar),
-//         {
-//           folder: `memories/users/${user._id}`,
-//           public_id: "avatar",
-//         }
-//       );
-//       user.account.avatar = uploadedUserAccountAvatar.secure_url;
-//     }
-//     const updatedUser = await User.findByIdAndUpdate(
-//       { _id: user._id },
-//       { $set: user },
-//       { new: true }
-//     );
-//     res.status(200).json({ result: true, user: updatedUser });
-//   } catch (error) {
-//     console.error({ error: error.message });
-//     res.status(500).json({ result: false, error: "An error occurred" });
-//   }
-// });
 
 router.put(
   "/updateUser",

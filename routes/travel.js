@@ -7,6 +7,7 @@ const cloudinary = require("cloudinary").v2;
 const convertToBase64 = require("../utils/convertToBase64");
 const isAuthenticated = require("../middleware/isAuthenticated");
 
+module.exports = convertToBase64;
 // TODO CREATE NEWTRAVEL POST
 // RECUPERE PLANNING POUR UN TRAVEL
 router.get("/planning", async (req, res) => {
@@ -44,6 +45,9 @@ router.get("/planning", async (req, res) => {
 router.post("/newTravel", isAuthenticated, async (req, res) => {
   try {
     // console.log(req.user);
+
+    // Enregistrez la nouvelle destination
+
     if (req.user) {
       // Convert the dates from "DD/MM/YYYY" to valid JavaScript format "YYYY-MM-DD"
       const departureDateParts = req.body.departure.split("/");
@@ -65,6 +69,7 @@ router.post("/newTravel", isAuthenticated, async (req, res) => {
       });
 
       if (req.files || req.files?.coverImage) {
+        // console.log(req.files);
         const resultToUpload = await cloudinary.uploader.upload(
           convertToBase64(req.files.coverImage),
           {
@@ -72,20 +77,20 @@ router.post("/newTravel", isAuthenticated, async (req, res) => {
             public_id: "coverImage",
           }
         );
-
+        // console.log(resultToUpload);
         newTrip.coverImage = resultToUpload.secure_url;
-        // newTrip.coverImage = resultToUpload.public_id;
       }
 
       // Save the newTrip first
       const savedTrip = await newTrip.save();
 
       // Now, update the user's travels
+      // console.log(savedTrip);
       const user = await User.findById(req.user._id);
       user.travels.push(savedTrip._id);
       await user.save();
 
-      res.status(200).json({ result: true, trip: savedTrip });
+      return res.status(200).json({ result: true, trip: savedTrip });
     }
   } catch (error) {
     console.error({ error: error.message });
@@ -206,36 +211,36 @@ router.delete("/deleteTrip", async (req, res) => {
       error: "You must provide the _id of the travel to delete.",
     });
   }
-
+  console.log(userId);
+  console.log(travelId);
   try {
     if (travelId) {
+      // const user =
+      await User.findByIdAndUpdate(
+        { _id: userId },
+        { $pull: { travels: travelId } },
+        { new: true }
+      );
       const deletedDestination = await Travel.findOneAndDelete({
         _id: travelId,
       });
       // const updateUserTravel =
-      await User.findByIdAndUpdate(
-        userId,
-        { $pull: { travels: travelId } },
-        { new: true }
-      );
-      // console.log(updateUserTravel);
+
+      // console.log(user);
       if (!deletedDestination) {
         return res
           .status(402)
           .json({ result: false, message: "place not found" });
       }
       if (deletedDestination) {
+        console.log(deletedDestination);
         await Diary.deleteMany({ travel: deletedDestination._id });
-      }
 
-      if (deletedDestination) {
         await cloudinary.api.delete_resources_by_prefix(
           `memories/travelsCover/${travelId}`
         );
         await cloudinary.api.delete_folder(`memories/travelsCover/${travelId}`);
       }
-
-      //   console.log(diariesDeleted);
       return res.status(200).json({
         result: true,
         travel: deletedDestination,
