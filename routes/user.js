@@ -8,7 +8,7 @@ const convertToBase64 = require("../utils/convertToBase64");
 const Diary = require("../models/diaries");
 const Travel = require("../models/travels");
 const User = require("../models/users");
-// const isAuthenticated = require("../middleware/isAuthenticated");
+const isAuthenticated = require("../middleware/isAuthenticated");
 const { check, validationResult } = require("express-validator");
 
 router.post("/signup", async (req, res) => {
