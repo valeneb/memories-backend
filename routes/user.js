@@ -16,63 +16,62 @@ router.post("/signup", async (req, res) => {
     const user = await User.findOne({
       email: req.body.email,
     });
-
-    if (user.email) {
+    console.log(user);
+    if (user) {
       return res
         .status(409)
         .json({ message: "This email already has an account" });
-    } else {
-      if (req.body.username && req.body.email && req.body.password) {
-        const token = uid2(64);
-        const salt = uid2(16);
+    }
+    if (req.body.username && req.body.email && req.body.password) {
+      const token = uid2(64);
+      const salt = uid2(16);
 
-        const hash = SHA256(req.body.password + salt).toString(encBase64);
+      const hash = SHA256(req.body.password + salt).toString(encBase64);
 
-        const newUser = await new User({
-          salt: salt,
-          hash: hash,
-          token: token,
-          email: req.body.email,
-          firstname: req.body.firstname,
-          lastname: req.body.lastname,
-          account: {
-            username: req.body.username,
-          },
+      const newUser = await new User({
+        salt: salt,
+        hash: hash,
+        token: token,
+        email: req.body.email,
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        account: {
+          username: req.body.username,
+        },
 
-          //!  password: password, ne pas enregistrer où le placer dans la nouvelle variable
-        });
+        //!  password: password, ne pas enregistrer où le placer dans la nouvelle variable
+      });
 
-        if (req.files && req.files?.avatar) {
-          const result = await cloudinary.uploader.upload(
-            convertToBase64(req.files.avatar),
+      if (req.files && req.files?.avatar) {
+        const result = await cloudinary.uploader.upload(
+          convertToBase64(req.files.avatar),
 
-            {
-              folder: `memories/users/${newUser._id}`,
-              public_id: "avatar",
-            }
-          );
-          ///${newUser._id}
-          //! console.log(result); celui qui renvoie toutes les infos utilisateurs
-          // console.log(req.files.avatar);
-          newUser.account.avatar = result.secure_url;
-          newUser.account.avatar = result.public_id;
-        }
-
-        await newUser.save();
-        res.status(201).json({
-          user: {
-            _id: newUser._id,
-            token: newUser.token,
-            email: newUser.email,
-            account: newUser.account,
-            lastname: newUser.lastname,
-            firstname: newUser.firstname,
-          },
-        });
-        console.log(newUser);
-      } else {
-        res.status(401).json({ message: "missing parameters" });
+          {
+            folder: `memories/users/${newUser._id}`,
+            public_id: "avatar",
+          }
+        );
+        ///${newUser._id}
+        //! console.log(result); celui qui renvoie toutes les infos utilisateurs
+        // console.log(req.files.avatar);
+        newUser.account.avatar = result.secure_url;
+        newUser.account.avatar = result.public_id;
       }
+
+      await newUser.save();
+      res.status(201).json({
+        user: {
+          _id: newUser._id,
+          token: newUser.token,
+          email: newUser.email,
+          account: newUser.account,
+          lastname: newUser.lastname,
+          firstname: newUser.firstname,
+        },
+      });
+      console.log(newUser);
+    } else {
+      res.status(401).json({ message: "missing parameters" });
     }
   } catch (error) {
     console.log(error.message);
@@ -80,61 +79,40 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-router.post(
-  "/login",
+router.post("/login", async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
 
-  [
-    check("email")
-      .isEmail()
-      .withMessage("Invalid email address format")
-      .normalizeEmail(),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
+    if (!user) {
+      return res.status(404).json({
         result: false,
-        errors: errors.array(),
+        error: "User not found",
       });
     }
 
-    try {
-      const user = await User.findOne({ email: req.body.email });
+    // Est-ce qu'il a rentré le bon mot de passe ?
 
-      if (!user) {
-        return res.status(404).json({
-          result: false,
-          error: "User not found",
-        });
-      }
-
-      // Est-ce qu'il a rentré le bon mot de passe ?
-
-      if (
-        SHA256(req.body.password + user.salt).toString(encBase64) === user.hash
-      ) {
-        return res.status(200).json({
-          user: {
-            token: user.token,
-            email: user.email,
-            account: user.account,
-            lastname: user.lastname,
-            firstname: user.firstname,
-            travels: user.travels._id,
-          },
-        });
-      } else {
-        return res.status(401).json({ result: false, error: "Unauthorized" });
-      }
-    } catch (error) {
-      console.error(error.message);
-      return res
-        .status(500)
-        .json({ result: false, error: "An error occurred" });
+    if (
+      SHA256(req.body.password + user.salt).toString(encBase64) === user.hash
+    ) {
+      return res.status(200).json({
+        user: {
+          token: user.token,
+          email: user.email,
+          account: user.account,
+          lastname: user.lastname,
+          firstname: user.firstname,
+          travels: user.travels._id,
+        },
+      });
+    } else {
+      return res.status(401).json({ result: false, error: "Unauthorized" });
     }
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ result: false, error: "An error occurred" });
   }
-);
+});
 
 // TODO DELETE USER
 

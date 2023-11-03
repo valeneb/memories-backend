@@ -30,7 +30,7 @@ router.get("/allPictures", isAuthenticated, async (req, res) => {
     diaries.forEach((diary) => {
       allImages.push(...diary.moment_pictures);
     });
-
+    console.log(travels);
     if (allImages.length > 0) {
       res.json({
         result: true,
