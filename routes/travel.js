@@ -43,7 +43,7 @@ router.get("/planning", async (req, res) => {
 });
 router.post("/newTravel", isAuthenticated, async (req, res) => {
   try {
-    console.log(req.user);
+    // console.log(req.user);
     if (req.user) {
       // Convert the dates from "DD/MM/YYYY" to valid JavaScript format "YYYY-MM-DD"
       const departureDateParts = req.body.departure.split("/");
@@ -74,7 +74,7 @@ router.post("/newTravel", isAuthenticated, async (req, res) => {
         );
 
         newTrip.coverImage = resultToUpload.secure_url;
-        newTrip.account.avatar = resultToUpload.public_id;
+        newTrip.account.coverImage = resultToUpload.public_id;
       }
 
       // Save the newTrip first

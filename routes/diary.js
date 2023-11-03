@@ -110,6 +110,7 @@ router.put("/update", async (req, res) => {
             }
           );
           diaryToModify.moment_pictures.push(resultToUpload.secure_url);
+          diaryToModify.moment_pictures.push(resultToUpload.public_id);
           // console.log(diaryToModify.moment_pictures);
           // console.log(resultToUpload);
         }
@@ -129,6 +130,7 @@ router.put("/update", async (req, res) => {
           }
         );
         diaryToModify.moment_pictures.push(resultToUpload.secure_url);
+        diaryToModify.moment_pictures.push(resultToUpload.public_id);
       }
     }
     const savedAndUpdatedDiary = await diaryToModify.save();
@@ -192,91 +194,3 @@ router.delete("/", async (req, res) => {
 });
 
 module.exports = router;
-// Supprimez le journal en utilisant son ID
-
-//   (diaryItem) => {
-//   diaryId.toString() === diaryItem._id.toString();
-//   console.log(diaryItem);
-// });
-// const diaryIdToTravel = travel.travelDiary.find(
-//   (diaryItem) => diaryId === diaryItem._id
-// );
-// diaryIdToTravel[0].remove();
-// diaryIdToTravel[0].delete();
-
-// console.log(travel);
-/* if (req.files?.picture) {
-  if (!Array.isArray(req.files.picture)) {
-    const picture = req.files.picture;
-
-    if (picture.mimetype.slice(0, 5) !== "image") {
-      return res.status(400).json({
-        result: false,
-        message:
-          "You must send an image in a good format (jpeg/jpg/png, etc.).",
-      });
-    }
-
-    const resultToUpload = await cloudinary.uploader.upload(
-      convertToBase64(picture),
-      {
-        folder: `memories/diary_images/${newDiary._id}`,
-        public_id: "diary",
-      }
-    );
-
-    newDiary.moment = resultToUpload;
-    newDiary.moment_pictures.push(resultToUpload);
-  } else {
-    for (let i = 0; i < req.files.picture.length; i++) {
-      const picture = req.files.picture[i];
-
-      if (picture.mimetype.slice(0, 5) !== "image") {
-        return res.status(400).json({
-          message:
-            "You must send images in a good format (jpeg/jpg/png, etc.).",
-        });
-      }
-
-      const resultToUpload = await cloudinary.uploader.upload(
-        convertToBase64(picture),
-        {
-          folder: `memories/diary_images/${newDiary._id}`,
-        }
-      );
-
-      newDiary.moment_pictures.push(resultToUpload);
-    }
-  }
-}*/
-// await cloudinary.uploader.destroy(diaryToModify.moment.public_id);
-//   const resultUploadedMoment = await cloudinary.uploader.upload(
-//     convertToBase64(req.files.picture),
-//     {
-//       folder: `memories/diary_images/${diaryToModify._id}`,
-//       public_id: "diary",
-//     }
-//   );
-//   console.log(diaryToModify.moment_pictures);
-//   // diaryToModify.moment = resultUploadedMoment;
-//   diaryToModify.moment_pictures.push(resultUploadedMoment);
-//   console.log(resultUploadedMoment);
-// }
-// // (
-
-//   Array.isArray(req.files?.picture) ||
-//   req.files?.picture.length >= 0
-// )
-
-//   // const savedDiary = await newDiary.save();
-//   findTravel.travelDiary.push(savedDiary._id);
-//   await findTravel.save();
-// console.log(diaryIdToDelete);
-// for (let i = 0; i < travel.travelDiary.length; i++) {
-//   if (travel.travelDiary[i].toString() === diaryId.toString()) {
-//     console.log(travel.travelDiary[i]);
-//   }
-// }
-// console.log(travel.travelDiary);
-
-// await Travel.findOneAndDelete(diaryIdToTravel[0]);
