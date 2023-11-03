@@ -74,7 +74,7 @@ router.post("/newTravel", isAuthenticated, async (req, res) => {
         );
 
         newTrip.coverImage = resultToUpload.secure_url;
-        newTrip.coverImage = resultToUpload.public_id;
+        // newTrip.coverImage = resultToUpload.public_id;
       }
 
       // Save the newTrip first
@@ -172,7 +172,7 @@ router.put("/update", async (req, res) => {
       );
       // console.log(uploadedCoverImage);
       travelToModify.coverImage = uploadedCoverImage.secure_url;
-      travelToModify.coverImage = uploadedCoverImage.public_id;
+      // travelToModify.coverImage = uploadedCoverImage.public_id;
     }
     // console.log(travelToModify);
     // Effectuez la mise à jour en utilisant findOneAndUpdate.

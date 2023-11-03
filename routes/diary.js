@@ -110,7 +110,7 @@ router.put("/update", async (req, res) => {
             }
           );
           diaryToModify.moment_pictures.push(resultToUpload.secure_url);
-          diaryToModify.moment_pictures.push(resultToUpload.public_id);
+          // diaryToModify.moment_pictures.push(resultToUpload.public_id);
           // console.log(diaryToModify.moment_pictures);
           // console.log(resultToUpload);
         }
@@ -130,7 +130,7 @@ router.put("/update", async (req, res) => {
           }
         );
         diaryToModify.moment_pictures.push(resultToUpload.secure_url);
-        diaryToModify.moment_pictures.push(resultToUpload.public_id);
+        // diaryToModify.moment_pictures.push(resultToUpload.public_id);
       }
     }
     const savedAndUpdatedDiary = await diaryToModify.save();

@@ -71,7 +71,7 @@ router.post(
           //! console.log(result); celui qui renvoie toutes les infos utilisateurs
           // console.log(req.files.avatar);
           newUser.account.avatar = result.secure_url;
-          newUser.account.avatar = result.public_id;
+          // newUser.account.avatar = result.public_id;
         }
 
         await newUser.save();
