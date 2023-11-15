@@ -70,69 +70,137 @@ router.get("/", async (req, res) => {
 });
 
 //TODO Route pour mettre à jour un Diary (Update)
+// router.put("/update", async (req, res) => {
+//   // console.log(req.body);
+//   const diaryId = req.query.diaryId;
+//   if (!diaryId) {
+//     return res.status(401).json({
+//       result: false,
+//       error: "diary file doesn't exist start to create something",
+//     });
+//   }
+//   const diaryToModify = await Diary.findById(diaryId);
+//   // console.log(diaryToModify);
+//   try {
+//     if (req.body.title) {
+//       diaryToModify.title = req.body.title;
+//       // console.log(req.body.title);
+//     }
+//     if (req.body.description) {
+//       diaryToModify.description = req.body.description;
+//       console.log(req.body.description);
+//     }
+//     if (req.files?.picture) {
+//       // console.log(req.files);
+//       // console.log(diaryToModify.moment);
+//       if (Array.isArray(req.files.picture)) {
+//         for (let i = 0; i < req.files.picture.length; i++) {
+//           const picture = req.files.picture[i];
+//           //console.log(picture);
+//           if (picture.mimetype.slice(0, 5) !== "image") {
+//             return res.status(400).json({
+//               message:
+//                 "You must send images in a good format (jpeg/jpg/png, etc.).",
+//             });
+//           }
+//           const resultToUpload = await cloudinary.uploader.upload(
+//             convertToBase64(picture),
+//             {
+//               folder: `memories/diary_images/${diaryToModify._id}`,
+//             }
+//           );
+//           diaryToModify.moment_pictures.push(resultToUpload.secure_url);
+//           // diaryToModify.moment_pictures.push(resultToUpload.public_id);
+//           // console.log(diaryToModify.moment_pictures);
+//           // console.log(resultToUpload);
+//         }
+//       } else {
+//         const picture = req.files.picture;
+
+//         if (picture.mimetype.slice(0, 5) !== "image") {
+//           return res.status(400).json({
+//             message:
+//               "You must send images in a good format (jpeg/jpg/png, etc.).",
+//           });
+//         }
+//         const resultToUpload = await cloudinary.uploader.upload(
+//           convertToBase64(picture),
+//           {
+//             folder: `memories/diary_images/${diaryToModify._id}`,
+//           }
+//         );
+//         diaryToModify.moment_pictures.push(resultToUpload.secure_url);
+//         // diaryToModify.moment_pictures.push(resultToUpload.public_id);
+//       }
+//     }
+//     const savedAndUpdatedDiary = await diaryToModify.save();
+//     res.status(201).json({ result: true, diary: savedAndUpdatedDiary });
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+//TODO promise all /
+const util = require("util");
+const cloudinaryUpload = util.promisify(cloudinary.uploader.upload);
+
 router.put("/update", async (req, res) => {
-  // console.log(req.body);
   const diaryId = req.query.diaryId;
+
   if (!diaryId) {
     return res.status(401).json({
       result: false,
       error: "diary file doesn't exist start to create something",
     });
   }
+
   const diaryToModify = await Diary.findById(diaryId);
-  // console.log(diaryToModify);
+
   try {
+    const updatePromises = [];
+
     if (req.body.title) {
       diaryToModify.title = req.body.title;
-      // console.log(req.body.title);
     }
     if (req.body.description) {
       diaryToModify.description = req.body.description;
-      console.log(req.body.description);
     }
     if (req.files?.picture) {
-      // console.log(req.files);
-      // console.log(diaryToModify.moment);
       if (Array.isArray(req.files.picture)) {
         for (let i = 0; i < req.files.picture.length; i++) {
           const picture = req.files.picture[i];
-          //console.log(picture);
           if (picture.mimetype.slice(0, 5) !== "image") {
             return res.status(400).json({
               message:
                 "You must send images in a good format (jpeg/jpg/png, etc.).",
             });
           }
-          const resultToUpload = await cloudinary.uploader.upload(
-            convertToBase64(picture),
-            {
+          updatePromises.push(
+            cloudinaryUpload(convertToBase64(picture), {
               folder: `memories/diary_images/${diaryToModify._id}`,
-            }
+            })
           );
-          diaryToModify.moment_pictures.push(resultToUpload.secure_url);
-          // diaryToModify.moment_pictures.push(resultToUpload.public_id);
-          // console.log(diaryToModify.moment_pictures);
-          // console.log(resultToUpload);
         }
       } else {
         const picture = req.files.picture;
-
         if (picture.mimetype.slice(0, 5) !== "image") {
           return res.status(400).json({
             message:
               "You must send images in a good format (jpeg/jpg/png, etc.).",
           });
         }
-        const resultToUpload = await cloudinary.uploader.upload(
-          convertToBase64(picture),
-          {
+        updatePromises.push(
+          cloudinaryUpload(convertToBase64(picture), {
             folder: `memories/diary_images/${diaryToModify._id}`,
-          }
+          })
         );
-        diaryToModify.moment_pictures.push(resultToUpload.secure_url);
-        // diaryToModify.moment_pictures.push(resultToUpload.public_id);
       }
     }
+
+    const uploadedResults = await Promise.all(updatePromises);
+    diaryToModify.moment_pictures.push(
+      ...uploadedResults.map((result) => result.secure_url)
+    );
     const savedAndUpdatedDiary = await diaryToModify.save();
     res.status(201).json({ result: true, diary: savedAndUpdatedDiary });
   } catch (error) {
@@ -140,7 +208,6 @@ router.put("/update", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-//TODO 653aa5dba47d6cdeebfa10ea/
 
 //TODO Route pour supprimer un Diary (Delete)
 
